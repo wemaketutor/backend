@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
-
 @RestController
 @RequiredArgsConstructor
 public class EventController {
@@ -45,6 +42,16 @@ public class EventController {
     @PutMapping("/update/event")
     public ResponseEntity<?> putMethodName(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
         return eventService.updateEntity(principal.getUserId(), request.getEvent_id(), request.getName(), request.getDate(), request.getDate_created(), request.getDescription());
+    }
+
+    @GetMapping("/myteacher/{teacher_id}/events")
+    public ResponseEntity<?> getMyTeacherEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("teacher_id") Long teacherId) {
+        return eventService.getMyTeacherEvents(principal.getUserId(), teacherId);
+    }
+    
+    @GetMapping("/mystudent/{student_id}/events")
+    public ResponseEntity<?> getMyStudentEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
+        return eventService.getMyStudentEvents(principal.getUserId(), studentId);
     }
     
 

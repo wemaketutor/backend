@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -45,6 +47,11 @@ public class TeacherController {
     public ResponseEntity<?> deleteStudent(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
         return teacherService.deleteStudentById(principal.getUserId(), studentId);
     }
+
+    // @PutMapping("path/{id}")
+    // public ResponseEntity<?> updateSubjects(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated TeacherRequest request) {        
+    //     return teacherService.updateSubjects(principal.getUserId(), request.getSubjects());
+    // }
     
     
 }

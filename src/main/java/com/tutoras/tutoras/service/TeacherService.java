@@ -100,4 +100,8 @@ public class TeacherService {
         }
 
     }
+
+    // public ResponseEntity<?> updateSubjects(Long teacherId, List<String> subjects) {
+        
+    // }
 }

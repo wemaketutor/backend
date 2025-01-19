@@ -1,9 +1,17 @@
+server:
+  port:
+    8081
+logging:
+  level:
+    root: "warn"
+    org.springframework.web: "error"
+    org.hibernate: "error"
 security:
     jwt:
         secret-key: thisprojecthasbeenindevelopmentforalongtimesecret
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/tutoraspsqldb
+    url: jdbc:postgresql://db:5432/tutoraspsqldb
     username: niccneimi
     password: securepassword
   jpa:
@@ -12,3 +20,15 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true

@@ -8,9 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.tutoras.tutoras.entity.EventEntity;
+import com.tutoras.tutoras.entity.StudentEntity;
+import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.ErrorResponse;
 import com.tutoras.tutoras.repository.EventRepository;
+import com.tutoras.tutoras.repository.StudentRepository;
+import com.tutoras.tutoras.repository.TeacherRepository;
 import com.tutoras.tutoras.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,8 @@ public class EventService {
 
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
 
     public ResponseEntity<?> getEvents(Long userId) {
         Optional<UserEntity> userOptional = userRepository.findById(userId);
@@ -89,5 +95,39 @@ public class EventService {
         EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description);
         eventRepository.save(updatedEntity);
         return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<?> getMyTeacherEvents(Long studentId, Long getingPersonId) {
+        Optional<TeacherEntity> teacherOptional = teacherRepository.findById(getingPersonId);
+        if (!teacherOptional.isPresent()) {
+            ErrorResponse errorResponse = new ErrorResponse(404L, "Учитель не найден");
+            return ResponseEntity.status(404).body(errorResponse);
+        }
+        TeacherEntity teacher = teacherOptional.get();
+        StudentEntity student = studentRepository.findById(studentId).get();
+        List<TeacherEntity> realTeachers = student.getTeachers();
+        if (!realTeachers.contains(teacher)) {
+            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к расписанию этого учителя для вас запрещён");
+            return ResponseEntity.status(403).body(errorResponse);
+        }
+        UserEntity verifiedTeacher = userRepository.findById(getingPersonId).get();
+        return ResponseEntity.ok(verifiedTeacher.getEvents());
+    }
+
+    public ResponseEntity<?> getMyStudentEvents(Long teacherId, Long getingPersonId) {
+        Optional<StudentEntity> studentOptional = studentRepository.findById(getingPersonId);
+        if (!studentOptional.isPresent()) {
+            ErrorResponse errorResponse = new ErrorResponse(404L, "Ученик не найден");
+            return ResponseEntity.status(404).body(errorResponse);
+        }
+        StudentEntity student = studentOptional.get();
+        TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+        List<StudentEntity> realStudents = teacher.getStudents();
+        if (!realStudents.contains(student)) {
+            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к расписанию этого ученика для вас запрещён");
+            return ResponseEntity.status(403).body(errorResponse);
+        }
+        UserEntity verifiedStudent = userRepository.findById(getingPersonId).get();
+        return ResponseEntity.ok(verifiedStudent.getEvents());
     }
 }
