@@ -46,12 +46,37 @@ public class UserEntity {
     @JsonIgnore
     private List<EventEntity> eventsAsFollower;
 
+    private String avatar;
+
     @SuppressWarnings("unused")
     private UserEntity () {}
 
-    public UserEntity (String email, String password, String role) {
+    public UserEntity(String email, String password, String role) {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public UserEntity(
+        Long id, 
+        String firstName, 
+        String lastName, 
+        String extraInfo, 
+        String avatar, 
+        String email, 
+        String password, 
+        String role, 
+        List<EventEntity> events, 
+        List<EventEntity> eventsAsFollower) {
+            this.id = id;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.extraInfo = extraInfo;
+            this.avatar = avatar;
+            this.email = email;
+            this.password = password;
+            this.role = role;
+            this.events = events;
+            this.eventsAsFollower = eventsAsFollower;
     }
 }
