@@ -24,32 +24,32 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping("/myevents")
+    @GetMapping("/api/myevents")
     public ResponseEntity<?> getEvents(@AuthenticationPrincipal UserPrincipal principal) {
         return eventService.getEvents(principal.getUserId());
     }
 
-    @PostMapping("/addevent")
+    @PostMapping("/api/addevent")
     public ResponseEntity<?> addEvent(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
         return eventService.addEvent(principal.getUserId(), request.getDate(), request.getName(), request.getDate_created(), request.getGetingPersonId());
     }
     
-    @DeleteMapping("/delete/event/{event_id}")
+    @DeleteMapping("/api/delete/event/{event_id}")
     public ResponseEntity<?> deleteEvent(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("event_id") Long studentId) {
         return eventService.deleteEvent(principal.getUserId(), studentId);
     }
 
-    @PutMapping("/update/event")
+    @PutMapping("/api/update/event")
     public ResponseEntity<?> putMethodName(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
         return eventService.updateEntity(principal.getUserId(), request.getEvent_id(), request.getName(), request.getDate(), request.getDate_created(), request.getDescription(), request.getGetingPersonId());
     }
 
-    @GetMapping("/myteacher/{teacher_id}/events")
+    @GetMapping("/api/myteacher/{teacher_id}/events")
     public ResponseEntity<?> getMyTeacherEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("teacher_id") Long teacherId) {
         return eventService.getMyTeacherEvents(principal.getUserId(), teacherId);
     }
     
-    @GetMapping("/mystudent/{student_id}/events")
+    @GetMapping("/api/mystudent/{student_id}/events")
     public ResponseEntity<?> getMyStudentEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
         return eventService.getMyStudentEvents(principal.getUserId(), studentId);
     }

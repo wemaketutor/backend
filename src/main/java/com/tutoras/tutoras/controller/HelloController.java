@@ -12,20 +12,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HelloController {
 
-    @GetMapping("/")
+    @GetMapping("/api/")
     public String greeting() {
         return "Hello, world!";
     }
-
-    @GetMapping("/secured")
-    public String secured(@AuthenticationPrincipal UserPrincipal principal) {
-        return "If you see this, than you're logged in as user " + principal.getEmail()
-            + " User ID: " + principal.getUserId();
-    }
-
-    @GetMapping("/admin")
-    public String admin(@AuthenticationPrincipal UserPrincipal principal) {
-        return "If you see this, you are an ADMIN, USER ID: " + principal.getUserId();
-    }
-
 }
