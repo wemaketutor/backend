@@ -31,7 +31,7 @@ public class EventController {
 
     @PostMapping("/addevent")
     public ResponseEntity<?> addEvent(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
-        return eventService.addEvent(principal.getUserId(), request.getDate(), request.getName(), request.getDate_created());
+        return eventService.addEvent(principal.getUserId(), request.getDate(), request.getName(), request.getDate_created(), request.getGetingPersonId());
     }
     
     @DeleteMapping("/delete/event/{event_id}")
@@ -41,7 +41,7 @@ public class EventController {
 
     @PutMapping("/update/event")
     public ResponseEntity<?> putMethodName(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
-        return eventService.updateEntity(principal.getUserId(), request.getEvent_id(), request.getName(), request.getDate(), request.getDate_created(), request.getDescription());
+        return eventService.updateEntity(principal.getUserId(), request.getEvent_id(), request.getName(), request.getDate(), request.getDate_created(), request.getDescription(), request.getGetingPersonId());
     }
 
     @GetMapping("/myteacher/{teacher_id}/events")

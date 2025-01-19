@@ -24,7 +24,7 @@ public class EventEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id_1", nullable = false)
     private UserEntity user;
 
     private LocalDateTime date;
@@ -37,10 +37,14 @@ public class EventEntity {
 
     private LocalDateTime update_at;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id_2", nullable = false)
+    private UserEntity folowed_user;
+
     @SuppressWarnings("unused")
     private EventEntity () {}
 
-    public EventEntity(Long id, LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description) {
+    public EventEntity(Long id, LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user) {
         this.id = id;
         this.date = date;
         this.date_created = date_created;
@@ -48,14 +52,16 @@ public class EventEntity {
         this.user = user;
         this.update_at = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         this.description = description;
+        this.folowed_user = folowed_user;
     }
 
-    public EventEntity(LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description) {
+    public EventEntity(LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user) {
         this.date = date;
         this.date_created = date_created;
         this.name = name;
         this.user = user;
         this.update_at = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         this.description = description;
+        this.folowed_user = folowed_user;
     }
 }

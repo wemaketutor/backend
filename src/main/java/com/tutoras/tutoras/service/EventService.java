@@ -12,6 +12,7 @@ import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.ErrorResponse;
+import com.tutoras.tutoras.model.EventResponse;
 import com.tutoras.tutoras.repository.EventRepository;
 import com.tutoras.tutoras.repository.StudentRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
@@ -35,17 +36,44 @@ public class EventService {
             return ResponseEntity.status(404).body(errorResponse);
         }
         UserEntity user = userOptional.get();
-        return ResponseEntity.ok(user.getEvents());
+        List<EventEntity> ownerEvents = user.getEvents();
+        List<EventEntity> followerEvents = user.getEventsAsFollower();
+        EventResponse eventResponse = new EventResponse(ownerEvents, followerEvents);
+        return ResponseEntity.ok(eventResponse);
     }
 
-    public ResponseEntity<?> addEvent(Long userId, LocalDateTime date, String name, LocalDateTime date_created) {
+    public ResponseEntity<?> addEvent(Long userId, LocalDateTime date, String name, LocalDateTime date_created, Long gettingPersonId) {
         Optional<UserEntity> userOptional = userRepository.findById(userId);
+        Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!userOptional.isPresent()) {
             ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
+        if (!personOptional.isPresent()) {
+            ErrorResponse errorResponse = new ErrorResponse(404L, "Не найдено связанного с вами пользователя");
+            return ResponseEntity.status(404).body(errorResponse);
+        }
+        UserEntity person = personOptional.get();
         UserEntity user = userOptional.get();
-        EventEntity event = new EventEntity(date, date_created, name, user, null);
+        if (user.getRole().equals("ROLE_TEACHER")) {
+            TeacherEntity userAsTeacher = teacherRepository.findById(userId).get();
+            StudentEntity personAsStudent = studentRepository.findById(gettingPersonId).get();
+            List<StudentEntity> realStudents = userAsTeacher.getStudents();
+            if (!realStudents.contains(personAsStudent)) {
+                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого ученика в расписание для вас запрещён");
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+        }
+        if (user.getRole().equals("ROLE_STUDENT")) {
+            StudentEntity userAsStudent = studentRepository.findById(userId).get();
+            TeacherEntity personAsTeacher = teacherRepository.findById(gettingPersonId).get();
+            List<TeacherEntity> realTeachers = userAsStudent.getTeachers();
+            if (!realTeachers.contains(personAsTeacher)) {
+                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого учителя в расписание для вас запрещён");
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+        }
+        EventEntity event = new EventEntity(date, date_created, name, user, null, person);
         eventRepository.save(event);
         
         return ResponseEntity.status(201).body(event);
@@ -74,8 +102,9 @@ public class EventService {
         
     }
 
-    public ResponseEntity<?> updateEntity(Long userId, Long eventId, String name, LocalDateTime date, LocalDateTime dateCreated, String description) {
+    public ResponseEntity<?> updateEntity(Long userId, Long eventId, String name, LocalDateTime date, LocalDateTime dateCreated, String description, Long gettingPersonId) {
         Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
+        Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!eventOptional.isPresent()) {
             ErrorResponse errorResponse = new ErrorResponse(404L, "Событие не найдено");
             return ResponseEntity.status(404).body(errorResponse);
@@ -85,14 +114,37 @@ public class EventService {
             ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
+        if (!personOptional.isPresent()) {
+            ErrorResponse errorResponse = new ErrorResponse(404L, "Не найдено связанного с вами пользователя");
+            return ResponseEntity.status(404).body(errorResponse);
+        }
         UserEntity user = userOptional.get();
+        if (user.getRole().equals("ROLE_TEACHER")) {
+            TeacherEntity userAsTeacher = teacherRepository.findById(userId).get();
+            StudentEntity personAsStudent = studentRepository.findById(gettingPersonId).get();
+            List<StudentEntity> realStudents = userAsTeacher.getStudents();
+            if (!realStudents.contains(personAsStudent)) {
+                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого ученика в расписание для вас запрещён");
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+        }
+        if (user.getRole().equals("ROLE_STUDENT")) {
+            StudentEntity userAsStudent = studentRepository.findById(userId).get();
+            TeacherEntity personAsTeacher = teacherRepository.findById(gettingPersonId).get();
+            List<TeacherEntity> realTeachers = userAsStudent.getTeachers();
+            if (!realTeachers.contains(personAsTeacher)) {
+                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого учителя в расписание для вас запрещён");
+                return ResponseEntity.status(403).body(errorResponse);
+            }
+        }
         EventEntity event = eventOptional.get();
+        UserEntity person = personOptional.get();
         List<EventEntity> events = user.getEvents();
         if (!events.contains(event)) {
             ErrorResponse errorResponse = new ErrorResponse(403L, "Данное событие у вас не найдено");
             return ResponseEntity.status(403).body(errorResponse);
         }
-        EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description);
+        EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description, person);
         eventRepository.save(updatedEntity);
         return ResponseEntity.ok().build();
     }

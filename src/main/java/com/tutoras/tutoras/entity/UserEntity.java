@@ -42,6 +42,10 @@ public class UserEntity {
     @JsonIgnore
     private List<EventEntity> events;
 
+    @OneToMany(mappedBy = "folowed_user")
+    @JsonIgnore
+    private List<EventEntity> eventsAsFollower;
+
     @SuppressWarnings("unused")
     private UserEntity () {}
 
