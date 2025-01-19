@@ -16,7 +16,7 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    @GetMapping("/student/teachers")
+    @GetMapping("/api/student/teachers")
     public StudentResponse getTeachersStudents(@AuthenticationPrincipal UserPrincipal principal) {
         return studentService.getStudentsTeachers(principal.getUserId());
     }

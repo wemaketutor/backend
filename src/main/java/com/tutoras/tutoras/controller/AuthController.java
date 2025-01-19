@@ -24,12 +24,12 @@ public class AuthController {
     private final AuthService authService;
     private final UserService userService;
 
-    @PostMapping("/auth/login")
+    @PostMapping("/api/auth/login")
     public LoginResponse login(@RequestBody @Validated LoginRequest request) {
         return authService.attemptLogin(request.getEmail(), request.getPassword());
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/api/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
         return userService.getProfile(principal.getEmail());
     }

@@ -12,7 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -40,18 +39,16 @@ public class WebSecurityConfig {
                 .formLogin(login -> login.disable())
                 .securityMatcher("/**")
                 .authorizeHttpRequests(registry -> registry
-                                .requestMatchers("/").permitAll()
-                                .requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/teacher/**").hasRole("TEACHER")
-                                .requestMatchers("/student/**").hasRole("STUDENT")
-                                .requestMatchers("/profile").authenticated()
-                                .requestMatchers("/registration").permitAll()
+                                .requestMatchers("/api/").permitAll()
+                                .requestMatchers("/api/auth/login").permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/teacher/**").hasRole("TEACHER")
+                                .requestMatchers("/api/student/**").hasRole("STUDENT")
+                                .requestMatchers("/api/profile").authenticated()
+                                .requestMatchers("/api/registration").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
-                                .requestMatchers("/myteacher/**").hasRole("STUDENT")
-                                .requestMatchers("/mystudent/**").hasRole("TEACHER")
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/api/myteacher/**").hasRole("STUDENT")
+                                .requestMatchers("/api/mystudent/**").hasRole("TEACHER")
                                 .anyRequest().authenticated()
                 );
 
@@ -76,7 +73,7 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081"));
+        config.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081","http://0.0.0.0:5173"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
@@ -87,7 +84,7 @@ public class WebSecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081"));
+        configuration.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081","http://0.0.0.0:5173"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
