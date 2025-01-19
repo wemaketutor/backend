@@ -163,7 +163,10 @@ public class EventService {
             return ResponseEntity.status(403).body(errorResponse);
         }
         UserEntity verifiedTeacher = userRepository.findById(getingPersonId).get();
-        return ResponseEntity.ok(verifiedTeacher.getEvents());
+        List<EventEntity> ownerEvents = verifiedTeacher.getEvents();
+        List<EventEntity> followerEvents = verifiedTeacher.getEventsAsFollower();
+        EventResponse eventResponse = new EventResponse(ownerEvents, followerEvents);
+        return ResponseEntity.ok(eventResponse);
     }
 
     public ResponseEntity<?> getMyStudentEvents(Long teacherId, Long getingPersonId) {
@@ -180,6 +183,9 @@ public class EventService {
             return ResponseEntity.status(403).body(errorResponse);
         }
         UserEntity verifiedStudent = userRepository.findById(getingPersonId).get();
-        return ResponseEntity.ok(verifiedStudent.getEvents());
+        List<EventEntity> ownerEvents = verifiedStudent.getEvents();
+        List<EventEntity> followerEvents = verifiedStudent.getEventsAsFollower();
+        EventResponse eventResponse = new EventResponse(ownerEvents, followerEvents);
+        return ResponseEntity.ok(eventResponse);
     }
 }
