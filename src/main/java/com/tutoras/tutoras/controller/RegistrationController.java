@@ -19,7 +19,7 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
 
-    @PostMapping("/api/registration")
+    @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody @Validated RegistrationRequest request) {        
         return registrationService.attemptRegistration(request.getEmail(), request.getPassword(), request.getRole());
     }

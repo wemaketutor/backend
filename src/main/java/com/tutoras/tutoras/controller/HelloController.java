@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HelloController {
 
-    @GetMapping("/api/")
+    @GetMapping("/")
     public String greeting() {
         return "Hello, world!";
     }

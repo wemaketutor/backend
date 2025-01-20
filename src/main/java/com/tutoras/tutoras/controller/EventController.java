@@ -24,32 +24,32 @@ public class EventController {
 
     private final EventService eventService;
 
-    @GetMapping("/api/myevents")
+    @GetMapping("/myevents")
     public ResponseEntity<?> getEvents(@AuthenticationPrincipal UserPrincipal principal) {
         return eventService.getEvents(principal.getUserId());
     }
 
-    @PostMapping("/api/addevent")
+    @PostMapping("/addevent")
     public ResponseEntity<?> addEvent(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
         return eventService.addEvent(principal.getUserId(), request.getDate(), request.getName(), request.getDate_created(), request.getGetingPersonId(), request.getDuration());
     }
     
-    @DeleteMapping("/api/delete/event/{event_id}")
+    @DeleteMapping("/delete/event/{event_id}")
     public ResponseEntity<?> deleteEvent(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("event_id") Long studentId) {
         return eventService.deleteEvent(principal.getUserId(), studentId);
     }
 
-    @PutMapping("/api/update/event")
+    @PutMapping("/update/event")
     public ResponseEntity<?> putMethodName(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated EventRequest request) {
         return eventService.updateEntity(principal.getUserId(), request.getEvent_id(), request.getName(), request.getDate(), request.getDate_created(), request.getDescription(), request.getGetingPersonId(), request.getDuration());
     }
 
-    @GetMapping("/api/myteacher/{teacher_id}/events")
+    @GetMapping("/myteacher/{teacher_id}/events")
     public ResponseEntity<?> getMyTeacherEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("teacher_id") Long teacherId) {
         return eventService.getMyTeacherEvents(principal.getUserId(), teacherId);
     }
     
-    @GetMapping("/api/mystudent/{student_id}/events")
+    @GetMapping("/mystudent/{student_id}/events")
     public ResponseEntity<?> getMyStudentEvents(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
         return eventService.getMyStudentEvents(principal.getUserId(), studentId);
     }
