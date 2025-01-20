@@ -55,6 +55,7 @@ public class EventEntity {
         this.update_at = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         this.description = description;
         this.folowed_user = folowed_user;
+        this.duration = duration;
     }
 
     public EventEntity(LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user, LocalDateTime duration) {
@@ -65,5 +66,6 @@ public class EventEntity {
         this.update_at = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         this.description = description;
         this.folowed_user = folowed_user;
+        this.duration = duration;
     }
 }
