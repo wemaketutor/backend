@@ -41,10 +41,12 @@ public class EventEntity {
     @JoinColumn(name = "user_id_2", nullable = false)
     private UserEntity folowed_user;
 
+    private LocalDateTime duration;
+
     @SuppressWarnings("unused")
     private EventEntity () {}
 
-    public EventEntity(Long id, LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user) {
+    public EventEntity(Long id, LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user, LocalDateTime duration) {
         this.id = id;
         this.date = date;
         this.date_created = date_created;
@@ -55,7 +57,7 @@ public class EventEntity {
         this.folowed_user = folowed_user;
     }
 
-    public EventEntity(LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user) {
+    public EventEntity(LocalDateTime date, LocalDateTime date_created, String name, UserEntity user, String description, UserEntity folowed_user, LocalDateTime duration) {
         this.date = date;
         this.date_created = date_created;
         this.name = name;

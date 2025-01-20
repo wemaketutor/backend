@@ -16,4 +16,5 @@ public class EventRequest {
     private String description;
     private Long event_id;
     private Long getingPersonId;
+    private LocalDateTime duration;
 }

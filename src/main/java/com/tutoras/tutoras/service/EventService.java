@@ -42,7 +42,7 @@ public class EventService {
         return ResponseEntity.ok(eventResponse);
     }
 
-    public ResponseEntity<?> addEvent(Long userId, LocalDateTime date, String name, LocalDateTime date_created, Long gettingPersonId) {
+    public ResponseEntity<?> addEvent(Long userId, LocalDateTime date, String name, LocalDateTime date_created, Long gettingPersonId, LocalDateTime duration) {
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!userOptional.isPresent()) {
@@ -73,7 +73,7 @@ public class EventService {
                 return ResponseEntity.status(403).body(errorResponse);
             }
         }
-        EventEntity event = new EventEntity(date, date_created, name, user, null, person);
+        EventEntity event = new EventEntity(date, date_created, name, user, null, person, duration);
         eventRepository.save(event);
         
         return ResponseEntity.status(201).body(event);
@@ -102,7 +102,7 @@ public class EventService {
         
     }
 
-    public ResponseEntity<?> updateEntity(Long userId, Long eventId, String name, LocalDateTime date, LocalDateTime dateCreated, String description, Long gettingPersonId) {
+    public ResponseEntity<?> updateEntity(Long userId, Long eventId, String name, LocalDateTime date, LocalDateTime dateCreated, String description, Long gettingPersonId, LocalDateTime duration) {
         Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
         Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!eventOptional.isPresent()) {
@@ -144,7 +144,7 @@ public class EventService {
             ErrorResponse errorResponse = new ErrorResponse(403L, "Данное событие у вас не найдено");
             return ResponseEntity.status(403).body(errorResponse);
         }
-        EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description, person);
+        EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description, person, duration);
         eventRepository.save(updatedEntity);
         return ResponseEntity.ok().build();
     }

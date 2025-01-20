@@ -11,7 +11,7 @@ security:
         secret-key: thisprojecthasbeenindevelopmentforalongtimesecret
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/tutoraspsqldb
+    url: jdbc:postgresql://db:5432/tutoraspsqldb
     username: niccneimi
     password: securepassword
   jpa:
