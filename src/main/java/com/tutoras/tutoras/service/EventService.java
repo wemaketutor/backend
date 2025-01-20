@@ -74,8 +74,11 @@ public class EventService {
             }
         }
         EventEntity event = new EventEntity(date, date_created, name, user, null, person, duration);
+        if (isEventOverlapping(event, user.getEventsAsFollower()) || isEventOverlapping(event, user.getEvents()) || isEventOverlapping(event, person.getEventsAsFollower()) || isEventOverlapping(event, person.getEvents())) {
+            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого события невозможен из-за пересечения по дате");
+            return ResponseEntity.status(403).body(errorResponse);
+        }
         eventRepository.save(event);
-        
         return ResponseEntity.status(201).body(event);
     }
 
@@ -145,6 +148,10 @@ public class EventService {
             return ResponseEntity.status(403).body(errorResponse);
         }
         EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description, person, duration);
+        if (isEventOverlapping(event, user.getEventsAsFollower()) || isEventOverlapping(event, user.getEvents()) || isEventOverlapping(event, person.getEventsAsFollower()) || isEventOverlapping(event, person.getEvents())) {
+            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого события невозможен из-за пересечения по дате");
+            return ResponseEntity.status(403).body(errorResponse);
+        }
         eventRepository.save(updatedEntity);
         return ResponseEntity.ok().build();
     }
@@ -187,5 +194,14 @@ public class EventService {
         List<EventEntity> followerEvents = verifiedStudent.getEventsAsFollower();
         EventResponse eventResponse = new EventResponse(ownerEvents, followerEvents);
         return ResponseEntity.ok(eventResponse);
+    }
+
+    public boolean isEventOverlapping(EventEntity newEvent, List<EventEntity> existingEvents) {
+        for (EventEntity event : existingEvents) {
+            if (newEvent.getDate().isBefore(event.getDuration()) || newEvent.getDuration().isAfter(event.getDate())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
