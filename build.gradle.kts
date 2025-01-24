@@ -43,6 +43,10 @@ dependencies {
 	testImplementation("com.h2database:h2")
 }
 
+springBoot {
+    mainClass.set("com.tutoras.tutoras.TutorasApplication")
+}
+
 tasks.withType<BootJar>().configureEach {
   	archiveFileName = "service.jar"
 }

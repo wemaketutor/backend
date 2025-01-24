@@ -11,15 +11,19 @@ security:
         secret-key: thisprojecthasbeenindevelopmentforalongtimesecret
 spring:
   datasource:
-    url: jdbc:postgresql://db:5432/tutoraspsqldb
+    url: jdbc:postgresql://localhost:5432/tutoraspsqldb
     username: niccneimi
     password: securepassword
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  web:
+    resources:
+      static-locations:
+        - file:./uploads/
 management:
   endpoints:
     web:

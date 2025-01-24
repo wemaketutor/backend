@@ -41,14 +41,15 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(registry -> registry
                                 .requestMatchers("/api/").permitAll()
                                 .requestMatchers("/api/auth/login").permitAll()
+                                .requestMatchers("/images/avatars/**").permitAll()
+                                .requestMatchers("/api/registration").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                                 .requestMatchers("/api/student/**").hasRole("STUDENT")
-                                .requestMatchers("/api/profile").authenticated()
-                                .requestMatchers("/api/registration").permitAll()
-                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/api/myteacher/**").hasRole("STUDENT")
                                 .requestMatchers("/api/mystudent/**").hasRole("TEACHER")
+                                .requestMatchers("/api/profile").authenticated()
                                 .anyRequest().authenticated()
                 );
 
@@ -73,7 +74,7 @@ public class WebSecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081","http://localhost:5173"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:80","http://localhost:5173","http://localhost:8000","http://localhost:8081","https://localhost"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
@@ -84,7 +85,7 @@ public class WebSecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://0.0.0.0:1234","http://0.0.0.0:8081","http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:80","http://localhost:5173","http://localhost:8000","http://localhost:8081","https://localhost"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
