@@ -6,14 +6,24 @@ logging:
     root: "warn"
     org.springframework.web: "error"
     org.hibernate: "error"
-security:
-    jwt:
-        secret-key: thisprojecthasbeenindevelopmentforalongtimesecret
 spring:
+  cloud:
+    vault:
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      scheme: http
+      host: vault
+      port: 8200
+      fail-fast: true
+      kv:
+        enabled: true
+        backend: secret
+        default-context: tutor-backend
+      database:
+        enabled: true
+        role: dynamic-role
   datasource:
     url: jdbc:postgresql://db:5432/tutoraspsqldb
-    username: niccneimi
-    password: securepassword
   jpa:
     hibernate:
       ddl-auto: create
