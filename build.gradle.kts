@@ -31,6 +31,8 @@ dependencies {
 	implementation("org.postgresql:postgresql")
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.cloud:spring-cloud-starter-vault-config:4.2.0")
+	implementation("org.springframework.cloud:spring-cloud-vault-config-databases:4.2.0")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
