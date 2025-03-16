@@ -1,12 +1,13 @@
 package com.tutoras.tutoras.model;
 
-import com.tutoras.tutoras.entity.UserEntity;
+import lombok.Data;
 
-import lombok.Builder;
-import lombok.Getter;
-
-@Getter
-@Builder
+@Data
 public class UserResponse {
-    private UserEntity user;
+    private Long id;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String role;
+    private String avatar;
 }
