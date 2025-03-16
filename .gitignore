@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 tmp.pgsql
 src/main/resources/static/images/avatars/*
+docs/
 
 ### STS ###
 .apt_generated
