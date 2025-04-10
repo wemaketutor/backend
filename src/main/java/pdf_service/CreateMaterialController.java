@@ -23,11 +23,5 @@ public class CreateMaterialController {
             @RequestBody CreateMaterialRequest request
     ) {
 
-        if (!materialService.areMaterialsAccessible(request.getMaterialIds())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Some materials are not accessible");
-        }
-        Long materialId = materialService.createMaterial(authenticatedUser, request);
-        return ResponseEntity.ok(materialId);
     }
-
 }
