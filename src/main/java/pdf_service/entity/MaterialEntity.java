@@ -48,14 +48,18 @@ public class MaterialEntity {
     @JsonIgnore
     private List<StudentEntity> students = new ArrayList<>();
 
-    public MaterialEntity(Long id, String title, String description, String fileUrl,
-                          boolean isPublic, TeacherEntity teacher, List<StudentEntity> students) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
-        this.fileUrl = fileUrl;
-        this.isPublic = isPublic;
-        this.teacher = teacher;
-        this.students = students;
+//    public MaterialEntity(Long id, String title, String description, String fileUrl,
+//                          boolean isPublic, TeacherEntity teacher, List<StudentEntity> students) {
+//        this.id = id;
+//        this.title = title;
+//        this.description = description;
+////        this.fileUrl = fileUrl;
+////        this.isPublic = isPublic;
+//        this.teacher = teacher;
+////        this.students = students;
+//    }
+
+    public MaterialEntity(SourcesEntity source, TeacherEntity teacher){
+        //TODO
     }
 }

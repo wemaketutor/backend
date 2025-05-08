@@ -11,5 +11,5 @@ import java.util.ArrayList;
 @Builder
 @AllArgsConstructor
 public class CreateMaterialRequest {
-    ArrayList<Long> materials_id;
+    ArrayList<Long> sources_id;
 }

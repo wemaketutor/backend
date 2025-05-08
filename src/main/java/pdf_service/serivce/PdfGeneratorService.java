@@ -1,10 +1,12 @@
 package pdf_service.serivce;
 
+import pdf_service.entity.SourcesEntity;
+
 import java.util.ArrayList;
 
 public class PdfGeneratorService {
 
-    String generateCombinedPdf(ArrayList<MaterialFiles> materialFiles){
+    SourcesEntity generateCombinedSource(ArrayList<SourcesEntity> sources){
 
-    } //returns url to saved minio file
+    }
 }
