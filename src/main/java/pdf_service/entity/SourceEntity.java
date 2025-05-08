@@ -1,6 +1,5 @@
 package pdf_service.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -20,6 +19,7 @@ public class SourceEntity {
 
     private String title;
     private String description;
+
     private String body;
 
     public SourceEntity(Long id, String title, String description, String body) {

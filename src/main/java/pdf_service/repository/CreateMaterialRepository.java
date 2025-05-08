@@ -11,9 +11,6 @@ import java.util.List;
 
 
 public interface CreateMaterialRepository extends JpaRepository<MaterialEntity, Long> {
-
-    @Query("SELECT m FROM Sources m WHERE m.id IN :id")
-    ArrayList<SourceEntity> getAllByIds(@Param("id") List<Long> ids);
-
-
-} //done
+    @Query("SELECT m FROM Sources m WHERE m.id IN :ids")
+    List<SourceEntity> getAllByIds(@Param("ids") List<Long> ids);
+}

@@ -12,6 +12,7 @@ import pdf_service.model.CreateMaterialRequest;
 import pdf_service.repository.CreateMaterialRepository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class CreateMaterialService {
 
     public Long createMaterial(Long teacherId, CreateMaterialRequest request) {
 
-        ArrayList<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
+        List<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("No materials found with provided IDs");
         }
