@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
@@ -59,7 +58,7 @@ public class MaterialEntity {
 ////        this.students = students;
 //    }
 
-    public MaterialEntity(SourcesEntity source, TeacherEntity teacher){
+    public MaterialEntity(SourceEntity source, TeacherEntity teacher){
         //TODO
     }
 }
