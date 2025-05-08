@@ -1,5 +1,7 @@
 package pdf_service.serivce;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,10 @@ import java.util.ArrayList;
 public class CreateMaterialService {
     private final CreateMaterialRepository materialRepository;
     private final PdfGeneratorService pdfGeneratorService;
+    private final AuthenticationManager authenticationManager;
 
-    public Long createMaterial(CreateMaterialRequest request) {
+    public Long createMaterial(Long teacherId, CreateMaterialRequest request) {
+
         ArrayList<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("No materials found with provided IDs");
@@ -28,7 +32,8 @@ public class CreateMaterialService {
         SourceEntity combinedSource = pdfGeneratorService.generateCombinedSource(sources);
         String materialUrl = pdfGeneratorService.generatePdf(combinedSource);
 
-        MaterialEntity combinedMaterial(...); //TODO
-        return materialRepository.save(combinedMaterial);
+        MaterialEntity combinedMaterial = new MaterialEntity(combinedSource, teacherId, materialUrl);
+
+        return materialRepository.save(combinedMaterial).getId();
     }
 }

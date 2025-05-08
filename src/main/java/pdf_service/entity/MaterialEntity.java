@@ -1,11 +1,5 @@
 package pdf_service.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -19,46 +13,54 @@ import jakarta.persistence.JoinTable;
 import lombok.Getter;
 import lombok.Setter;
 
+
+import jakarta.persistence.*;
+import lombok.*;
+
+
 @Entity
+@Table(name = "materials")
 @Getter
 @Setter
-@Table(name = "materials")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MaterialEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
-    private String description;
-    private String fileUrl;
-    private boolean isPublic;
 
-    @ManyToOne
-    @JoinColumn(name = "teacher_id", nullable = false)
-    @JsonIgnore
+    @Column(nullable = false)
+    private String subject;
+
+    private String description;
+
+    @Column(name = "file_url", nullable = false)
+    private String fileUrl;
+
+    @Column(name = "is_public", nullable = false)
+    private Boolean isPublic;
+
+    @Column(name = "teacher_id", nullable = false)
+    private Long teacherId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id", nullable = false, insertable = false, updatable = false)
     private TeacherEntity teacher;
 
-    @ManyToMany
-    @JoinTable(
-            name = "MaterialsVisibleByUsers",
-            joinColumns = @JoinColumn(name = "material_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    @JsonIgnore
-    private List<StudentEntity> students = new ArrayList<>();
+//    @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<MaterialVisibleByUserEntity> visibleToUsers;
 
-//    public MaterialEntity(Long id, String title, String description, String fileUrl,
-//                          boolean isPublic, TeacherEntity teacher, List<StudentEntity> students) {
-//        this.id = id;
-//        this.title = title;
-//        this.description = description;
-////        this.fileUrl = fileUrl;
-////        this.isPublic = isPublic;
-//        this.teacher = teacher;
-////        this.students = students;
-//    }
-
-    public MaterialEntity(SourceEntity source, TeacherEntity teacher){
-        //TODO
+    public MaterialEntity(SourceEntity source, Long teacherId, String fileUrl) {
+        this.title = source.getTitle();
+        this.description = source.getDescription();
+        this.fileUrl = fileUrl;
+        this.isPublic = false;
+        this.teacherId = teacherId;
     }
+
 }

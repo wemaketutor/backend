@@ -14,4 +14,6 @@ public interface CreateMaterialRepository extends JpaRepository<MaterialEntity, 
 
     @Query("SELECT m FROM Sources m WHERE m.id IN :id")
     ArrayList<SourceEntity> getAllByIds(@Param("id") List<Long> ids);
+
+
 } //done
