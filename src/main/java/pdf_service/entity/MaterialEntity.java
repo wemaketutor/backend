@@ -1,4 +1,4 @@
-package pdf_service;
+package pdf_service.entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,6 @@ public class MaterialEntity {
 
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)
-    @JsonManagedReference
     @JsonIgnore
     private TeacherEntity teacher;
 

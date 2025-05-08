@@ -1,4 +1,4 @@
-package pdf_service;
+package pdf_service.controller;
 
 import com.tutoras.tutoras.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import pdf_service.model.CreateMaterialRequest;
+import pdf_service.serivce.CreateMaterialService;
 
 
 @RestController

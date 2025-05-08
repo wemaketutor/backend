@@ -1,4 +1,4 @@
-package pdf_service;
+package pdf_service.model;
 
 
 import lombok.AllArgsConstructor;
