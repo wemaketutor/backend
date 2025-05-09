@@ -32,9 +32,9 @@ public class PdfGeneratorService {
         copyTemplateToTemp("style.tex", tempDir);
     }
 
-    public String generatePdf(String content) throws IOException {
+    public String generatePdf(SourseEntity source) throws IOException {
         Path resFile = tempDir.resolve("res.tex");
-        Files.write(resFile, content.getBytes());
+        Files.write(source.getBody().getBytes());
 
         // compiling
         Path mainTex = tempDir.resolve("main.tex");
@@ -49,6 +49,18 @@ public class PdfGeneratorService {
         Files.deleteIfExists(pdfFile);
 
         return minioService.getFileUrl("materials", pdfName);
+    }
+
+    public SourceEntity generateCombinedSource(ArrayList<SourceEntity> sources) {
+        StringBuilder combinedBody = new StringBuilder();
+        String title = "Combined Material";
+        String description = "Combined from multiple sources";
+        
+        for (SourceEntity source : sources) {
+            combinedBody.append(source.getBody()).append("\n\n");
+        }
+        
+        return new SourceEntity(null, title, description, combinedBody.toString());
     }
 
     private void copyTemplateToTemp(String templateName, Path tempDir) throws IOException {

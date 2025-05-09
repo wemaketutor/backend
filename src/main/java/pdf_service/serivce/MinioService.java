@@ -1,7 +1,7 @@
 package pdf_service.serivce;
 
-import io.minio.*;
-import io.minio.errors.*;
+import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;

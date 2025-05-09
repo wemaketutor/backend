@@ -31,6 +31,8 @@ dependencies {
 	implementation("org.postgresql:postgresql")
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.minio:minio:8.5.7")
+	implementation("io.github.cdimascio:dotenv-java:3.0.0")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
