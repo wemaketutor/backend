@@ -1,5 +1,6 @@
 package pdf_service.controller;
 
+
 import com.tutoras.tutoras.security.UserPrincipal;
 import com.tutoras.tutoras.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import pdf_service.model.CreateMaterialRequest;
 import pdf_service.serivce.CreateMaterialService;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -36,8 +37,6 @@ class CreateMaterialControllerTest {
     private UserPrincipal createTeacherPrincipal() {
         return UserPrincipal.builder()
                 .userId(1L)
-                .email("teacher@example.com")
-                .password("password")
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_TEACHER")))
                 .build();
     }
@@ -45,52 +44,54 @@ class CreateMaterialControllerTest {
     private UserPrincipal createStudentPrincipal() {
         return UserPrincipal.builder()
                 .userId(2L)
-                .email("student@example.com")
-                .password("password")
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_STUDENT")))
                 .build();
     }
 
+    private CreateMaterialRequest createValidRequest() {
+        return CreateMaterialRequest.builder()
+                .sources_id(List.of(1L, 2L))
+                .build();
+    }
+
     @Test
-    void createMaterial_ShouldReturnUnauthorized_WhenPrincipalIsNull() {
-        ResponseEntity<?> response = createMaterialController.createMaterial(null, new CreateMaterialRequest());
+    void createMaterial_UnauthorizedWhenPrincipalNull() {
+        ResponseEntity<?> response = createMaterialController.createMaterial(null, createValidRequest());
+
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("User not authenticated", response.getBody());
     }
 
     @Test
-    void createMaterial_ShouldReturnForbidden_WhenUserIsNotTeacher() {
-        UserPrincipal studentPrincipal = createStudentPrincipal();
-        CreateMaterialRequest request = new CreateMaterialRequest();
-
-        ResponseEntity<?> response = createMaterialController.createMaterial(studentPrincipal, request);
+    void createMaterial_ForbiddenWhenNotTeacher() {
+        UserPrincipal student = createStudentPrincipal();
+        ResponseEntity<?> response = createMaterialController.createMaterial(student, createValidRequest());
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertEquals("Only teachers can create materials", response.getBody());
     }
 
     @Test
-    void createMaterial_ShouldReturnBadRequest_WhenRequestIsNull() {
-        UserPrincipal teacherPrincipal = createTeacherPrincipal();
-
-        ResponseEntity<?> response = createMaterialController.createMaterial(teacherPrincipal, null);
+    void createMaterial_BadRequestWhenRequestNull() {
+        UserPrincipal teacher = createTeacherPrincipal();
+        ResponseEntity<?> response = createMaterialController.createMaterial(teacher, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Invalid request data", response.getBody());
     }
 
     @Test
-    void createMaterial_ShouldReturnMaterialId_WhenSuccessful() {
-        UserPrincipal teacherPrincipal = createTeacherPrincipal();
-        CreateMaterialRequest request = new CreateMaterialRequest();
-        Long expectedMaterialId = 1L;
+    void createMaterial_Success() {
+        UserPrincipal teacher = createTeacherPrincipal();
+        CreateMaterialRequest request = createValidRequest();
+        Long expectedId = 1L;
 
-        when(createMaterialService.createMaterial(anyLong(), any(CreateMaterialRequest.class)))
-                .thenReturn(expectedMaterialId);
+        when(createMaterialService.createMaterial(anyLong(), any()))
+                .thenReturn(expectedId);
 
-        ResponseEntity<?> response = createMaterialController.createMaterial(teacherPrincipal, request);
+        ResponseEntity<?> response = createMaterialController.createMaterial(teacher, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(expectedMaterialId, response.getBody());
+        assertEquals(expectedId, response.getBody());
     }
 }
