@@ -9,7 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import pdf_service.entity.MaterialEntity;
 import pdf_service.entity.SourceEntity;
 import pdf_service.model.CreateMaterialRequest;
-import pdf_service.repository.CreateMaterialRepository;
+import pdf_service.repository.MaterialRepository;
+import pdf_service.repository.SourceRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +20,14 @@ import java.util.List;
 @Slf4j
 @Transactional
 public class CreateMaterialService {
-    private final CreateMaterialRepository materialRepository;
+    private final SourceRepository sourceRepository;
+    private final MaterialRepository materialRepository;
+
     private final PdfGeneratorService pdfGeneratorService;
-    private final AuthenticationManager authenticationManager;
 
     public Long createMaterial(Long teacherId, CreateMaterialRequest request) {
 
-        List<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
+        List<SourceEntity> sources = sourceRepository.getAllByIds(request.getSources_id());
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("No materials found with provided IDs");
         }
