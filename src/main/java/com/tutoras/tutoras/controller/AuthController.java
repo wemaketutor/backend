@@ -28,17 +28,17 @@ public class AuthController {
     private final UserService userService;
     private final ProfileService profileService;
 
-    @PostMapping("/api/auth/login")
+    @PostMapping("/auth/login")
     public LoginResponse login(@RequestBody @Validated LoginRequest request) {
         return authService.attemptLogin(request.getEmail(), request.getPassword());
     }
 
-    @GetMapping("/api/profile")
+    @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
         return userService.getProfile(principal.getEmail());
     }
 
-    @PutMapping("/api/profile/update")
+    @PutMapping("/profile/update")
     public ResponseEntity<?> updateProfile(
         @AuthenticationPrincipal UserPrincipal principal, 
         @ModelAttribute ProfileRequest request) {

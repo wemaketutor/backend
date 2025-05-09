@@ -38,6 +38,10 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+springBoot {
+    mainClass.set("com.tutoras.tutoras.TutorasApplication")
+}
+
 tasks.withType<BootJar>().configureEach {
   	archiveFileName = "service.jar"
 }

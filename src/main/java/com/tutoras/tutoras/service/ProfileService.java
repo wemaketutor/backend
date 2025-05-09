@@ -23,13 +23,17 @@ public class ProfileService {
         String avatarFileName = null;
         if (avatar != null) {
             try {
-                avatarFileName = imageService.saveImage("src/main/resources/static/images/avatars", avatar);
+                avatarFileName = imageService.saveImage("./uploads/images/avatars", avatar);
             } catch (IOException e) {
                 ErrorResponse errorResponse = new ErrorResponse(401L, "Ошибка загрузки изображения");
                 return ResponseEntity.status(401).body(errorResponse);
             }
         }
         UserEntity user = userRepository.findById(userId).get();
+        String existedAvatarPath = user.getAvatar();
+        if (existedAvatarPath != null && avatarFileName == null) {
+            avatarFileName = existedAvatarPath;
+        }
         UserEntity updatedEntity = new UserEntity(userId, firstName, lastName, extraInfo, avatarFileName, user.getEmail(), user.getPassword(), user.getRole(), user.getEvents(), user.getEventsAsFollower());
         userRepository.save(updatedEntity);
         return ResponseEntity.ok().build();
