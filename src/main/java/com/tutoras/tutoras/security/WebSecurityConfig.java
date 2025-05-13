@@ -40,7 +40,7 @@ public class WebSecurityConfig {
                 .securityMatcher("/**")
                 .authorizeHttpRequests(registry -> registry
                                 .requestMatchers("/api/").permitAll()
-                                .requestMatchers("/api/auth/login").permitAll()
+                                .requestMatchers("/api/auth/").permitAll()
                                 .requestMatchers("/images/avatars/**").permitAll()
                                 .requestMatchers("/api/registration").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
