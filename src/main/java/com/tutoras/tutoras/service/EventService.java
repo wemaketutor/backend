@@ -11,7 +11,7 @@ import com.tutoras.tutoras.entity.EventEntity;
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ErrorResponse;
+import com.tutoras.tutoras.model.ConflictErrorResponse;
 import com.tutoras.tutoras.model.EventResponse;
 import com.tutoras.tutoras.repository.EventRepository;
 import com.tutoras.tutoras.repository.StudentRepository;
@@ -32,7 +32,7 @@ public class EventService {
     public ResponseEntity<?> getEvents(Long userId) {
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         UserEntity user = userOptional.get();
@@ -46,11 +46,11 @@ public class EventService {
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!userOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         if (!personOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Не найдено связанного с вами пользователя");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Не найдено связанного с вами пользователя");
             return ResponseEntity.status(404).body(errorResponse);
         }
         UserEntity person = personOptional.get();
@@ -60,7 +60,7 @@ public class EventService {
             StudentEntity personAsStudent = studentRepository.findById(gettingPersonId).get();
             List<StudentEntity> realStudents = userAsTeacher.getStudents();
             if (!realStudents.contains(personAsStudent)) {
-                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого ученика в расписание для вас запрещён");
+                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого ученика в расписание для вас запрещён");
                 return ResponseEntity.status(403).body(errorResponse);
             }
         }
@@ -69,13 +69,13 @@ public class EventService {
             TeacherEntity personAsTeacher = teacherRepository.findById(gettingPersonId).get();
             List<TeacherEntity> realTeachers = userAsStudent.getTeachers();
             if (!realTeachers.contains(personAsTeacher)) {
-                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого учителя в расписание для вас запрещён");
+                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого учителя в расписание для вас запрещён");
                 return ResponseEntity.status(403).body(errorResponse);
             }
         }
         EventEntity event = new EventEntity(date, date_created, name, user, null, person, duration);
         if (isEventOverlapping(event, user.getEventsAsFollower()) || isEventOverlapping(event, user.getEvents()) || isEventOverlapping(event, person.getEventsAsFollower()) || isEventOverlapping(event, person.getEvents())) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого события невозможен из-за пересечения по дате");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого события невозможен из-за пересечения по дате");
             return ResponseEntity.status(403).body(errorResponse);
         }
         eventRepository.save(event);
@@ -85,19 +85,19 @@ public class EventService {
     public ResponseEntity<?> deleteEvent(Long userId, Long eventId) {
         Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
         if (!eventOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Событие не найдено");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Событие не найдено");
             return ResponseEntity.status(404).body(errorResponse);
         }
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         UserEntity user = userOptional.get();
         EventEntity event = eventOptional.get();
         List<EventEntity> events = user.getEvents();
         if (!events.contains(event)) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Данное событие у вас не найдено");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Данное событие у вас не найдено");
             return ResponseEntity.status(403).body(errorResponse);
         }
         eventRepository.delete(event);
@@ -109,16 +109,16 @@ public class EventService {
         Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
         Optional<UserEntity> personOptional = userRepository.findById(gettingPersonId);
         if (!eventOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Событие не найдено");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Событие не найдено");
             return ResponseEntity.status(404).body(errorResponse);
         }
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Пользователь не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Пользователь не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         if (!personOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Не найдено связанного с вами пользователя");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Не найдено связанного с вами пользователя");
             return ResponseEntity.status(404).body(errorResponse);
         }
         UserEntity user = userOptional.get();
@@ -127,7 +127,7 @@ public class EventService {
             StudentEntity personAsStudent = studentRepository.findById(gettingPersonId).get();
             List<StudentEntity> realStudents = userAsTeacher.getStudents();
             if (!realStudents.contains(personAsStudent)) {
-                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого ученика в расписание для вас запрещён");
+                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого ученика в расписание для вас запрещён");
                 return ResponseEntity.status(403).body(errorResponse);
             }
         }
@@ -136,7 +136,7 @@ public class EventService {
             TeacherEntity personAsTeacher = teacherRepository.findById(gettingPersonId).get();
             List<TeacherEntity> realTeachers = userAsStudent.getTeachers();
             if (!realTeachers.contains(personAsTeacher)) {
-                ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого учителя в расписание для вас запрещён");
+                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого учителя в расписание для вас запрещён");
                 return ResponseEntity.status(403).body(errorResponse);
             }
         }
@@ -144,12 +144,12 @@ public class EventService {
         UserEntity person = personOptional.get();
         List<EventEntity> events = user.getEvents();
         if (!events.contains(event)) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Данное событие у вас не найдено");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Данное событие у вас не найдено");
             return ResponseEntity.status(403).body(errorResponse);
         }
         EventEntity updatedEntity = new EventEntity(eventId ,date, dateCreated, name, user, description, person, duration);
         if (isEventOverlapping(event, user.getEventsAsFollower()) || isEventOverlapping(event, user.getEvents()) || isEventOverlapping(event, person.getEventsAsFollower()) || isEventOverlapping(event, person.getEvents())) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к добавлению этого события невозможен из-за пересечения по дате");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к добавлению этого события невозможен из-за пересечения по дате");
             return ResponseEntity.status(403).body(errorResponse);
         }
         eventRepository.save(updatedEntity);
@@ -159,14 +159,14 @@ public class EventService {
     public ResponseEntity<?> getMyTeacherEvents(Long studentId, Long getingPersonId) {
         Optional<TeacherEntity> teacherOptional = teacherRepository.findById(getingPersonId);
         if (!teacherOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Учитель не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Учитель не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         TeacherEntity teacher = teacherOptional.get();
         StudentEntity student = studentRepository.findById(studentId).get();
         List<TeacherEntity> realTeachers = student.getTeachers();
         if (!realTeachers.contains(teacher)) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к расписанию этого учителя для вас запрещён");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к расписанию этого учителя для вас запрещён");
             return ResponseEntity.status(403).body(errorResponse);
         }
         UserEntity verifiedTeacher = userRepository.findById(getingPersonId).get();
@@ -179,14 +179,14 @@ public class EventService {
     public ResponseEntity<?> getMyStudentEvents(Long teacherId, Long getingPersonId) {
         Optional<StudentEntity> studentOptional = studentRepository.findById(getingPersonId);
         if (!studentOptional.isPresent()) {
-            ErrorResponse errorResponse = new ErrorResponse(404L, "Ученик не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Ученик не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
         StudentEntity student = studentOptional.get();
         TeacherEntity teacher = teacherRepository.findById(teacherId).get();
         List<StudentEntity> realStudents = teacher.getStudents();
         if (!realStudents.contains(student)) {
-            ErrorResponse errorResponse = new ErrorResponse(403L, "Доступ к расписанию этого ученика для вас запрещён");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Доступ к расписанию этого ученика для вас запрещён");
             return ResponseEntity.status(403).body(errorResponse);
         }
         UserEntity verifiedStudent = userRepository.findById(getingPersonId).get();

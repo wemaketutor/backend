@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ErrorResponse;
+import com.tutoras.tutoras.model.ConflictErrorResponse;
 import com.tutoras.tutoras.model.TeacherResponse;
 import com.tutoras.tutoras.repository.StudentRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
@@ -65,7 +65,7 @@ public class TeacherService {
                 .build());
         }
         else {
-            ErrorResponse errorResponse = new ErrorResponse(404L,"Студент не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Студент не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
     }
@@ -95,7 +95,7 @@ public class TeacherService {
                 .build());
         }
         else {
-            ErrorResponse errorResponse = new ErrorResponse(404L,"Студент не найден");
+            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Студент не найден");
             return ResponseEntity.status(404).body(errorResponse);
         }
 

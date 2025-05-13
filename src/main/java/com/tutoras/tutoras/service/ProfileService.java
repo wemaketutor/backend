@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ErrorResponse;
+import com.tutoras.tutoras.model.ConflictErrorResponse;
 import com.tutoras.tutoras.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class ProfileService {
             try {
                 avatarFileName = imageService.saveImage("./uploads/images/avatars", avatar);
             } catch (IOException e) {
-                ErrorResponse errorResponse = new ErrorResponse(401L, "Ошибка загрузки изображения");
+                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Ошибка загрузки изображения");
                 return ResponseEntity.status(401).body(errorResponse);
             }
         }
