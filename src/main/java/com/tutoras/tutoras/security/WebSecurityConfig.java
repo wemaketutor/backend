@@ -34,13 +34,15 @@ public class WebSecurityConfig {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) //    .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/logout"))
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(login -> login.disable())
+                .logout(logout -> logout.disable())
                 .securityMatcher("/**")
                 .authorizeHttpRequests(registry -> registry
                                 .requestMatchers("/api/").permitAll()
-                                .requestMatchers("/api/auth/").permitAll()
+                                .requestMatchers("/api/auth/logout").authenticated()
+                                .requestMatchers("/api/auth/").anonymous()
                                 .requestMatchers("/images/avatars/**").permitAll()
                                 .requestMatchers("/api/registration").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()

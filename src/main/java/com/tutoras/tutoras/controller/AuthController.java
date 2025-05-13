@@ -8,6 +8,8 @@ import com.tutoras.tutoras.service.AuthService;
 import com.tutoras.tutoras.service.ProfileService;
 import com.tutoras.tutoras.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,12 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody @Validated LoginRequest request) {
         return authService.attemptLogin(request.getEmail(), request.getPassword());
     }
+
+    @GetMapping("/auth/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        return authService.attemptLogout(request, response);
+    }
+    
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal principal) {

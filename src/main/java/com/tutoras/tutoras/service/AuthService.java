@@ -3,15 +3,20 @@ package com.tutoras.tutoras.service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
 import com.tutoras.tutoras.model.LoginResponse;
+import com.tutoras.tutoras.model.UnauthorizedErrorResponse;
 import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.security.JwtIssuer;
 import com.tutoras.tutoras.security.UserPrincipal;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 
@@ -48,5 +53,15 @@ public class AuthService {
             .accessToken(token)
             .build()
         );
+    }
+
+    public ResponseEntity<?> attemptLogout(HttpServletRequest request, HttpServletResponse response){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            UnauthorizedErrorResponse errorResponse = new UnauthorizedErrorResponse("The userId should be a number");
+            return ResponseEntity.status(401).body(errorResponse);
+        }
+        new SecurityContextLogoutHandler().logout(request, response, auth);
+        return ResponseEntity.status(200).body(null);
     }
 }
