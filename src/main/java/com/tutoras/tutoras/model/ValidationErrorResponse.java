@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ErrorResponse {
-    private final Long code;
-    private final String message;
+public class ValidationErrorResponse {
+    private final String field;
+    private final String detail;
 }
