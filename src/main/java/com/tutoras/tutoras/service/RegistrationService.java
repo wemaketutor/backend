@@ -2,19 +2,18 @@ package com.tutoras.tutoras.service;
 
 import java.util.ArrayList;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ConflictErrorResponse;
-import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.model.RegistrationResponse;
 import com.tutoras.tutoras.repository.StudentRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
 import com.tutoras.tutoras.repository.UserRepository;
+import com.tutoras.tutoras.error.ConflictException;
+import com.tutoras.tutoras.error.ValidationException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,14 +30,12 @@ public class RegistrationService {
         return email != null && email.matches(emailRegex);
     }    
 
-    public ResponseEntity<?> attemptRegistration(String email, String password, String role) {
+    public RegistrationResponse attemptRegistration(String email, String password, String role) {
         if (!isValidEmail(email)) {
-            ValidationErrorResponse errorResponse = new ValidationErrorResponse("email", "The mail is incorrect");
-            return ResponseEntity.unprocessableEntity().body(errorResponse);
+            throw new ValidationException("email", "The mail is incorrect");
         }
         if (userRepository.findByEmail(email).isPresent()) {
-            ConflictErrorResponse errorResponse = new ConflictErrorResponse("Email already exists");
-            return ResponseEntity.status(409).body(errorResponse);
+            throw new ConflictException("Email already exists");
         }
 
         String encodedPassword = passwordEncoder.encode(password);
@@ -53,10 +50,6 @@ public class RegistrationService {
             studentRepository.save(student);
         }
         
-        return ResponseEntity.status(201).body(
-            RegistrationResponse.builder()
-            .text(user.getEmail())
-            .build()
-        );
+        return RegistrationResponse.builder().text(user.getEmail()).build();
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,27 +34,10 @@ public class HomeworkService {
     @Autowired
     private EventRepository eventRepository;
     
-    public HomeworksResponse getAllHomeworks(int page, int perPage) {
-        List<HomeworkEntity> homeworks = homeworkRepository.findAll();
-        
-        int totalCount = homeworks.size();
-        int fromIndex = (page - 1) * perPage;
-        int toIndex = Math.min(fromIndex + perPage, totalCount);
-        
-        List<HomeworkEntity> pagedHomeworks = homeworks.subList(fromIndex, toIndex);
-        
-        HomeworksResponse response = new HomeworksResponse();
-        response.setHomeworks(pagedHomeworks.stream()
-                .map(this::mapToHomeworkResponse)
-                .collect(Collectors.toList()));
-        response.setTotalCount(totalCount);
-        response.setPage(page);
-        response.setPerPage(perPage);
-        
-        return response;
-    }
-    
-    public HomeworksResponse getHomeworksByStudent(Long studentId, int page, int perPage) {
+    public ResponseEntity<?> getHomeworksForStudentFromTeacher(Long studentId, Long teacherId, int page, int perPage, String sort_by, String sort_order) {
+        if (!studentRepository.findById(teacherId).isPresent()){
+            
+        }
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
         

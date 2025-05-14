@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Service;
 
 import com.tutoras.tutoras.model.LoginResponse;
-import com.tutoras.tutoras.model.UnauthorizedErrorResponse;
+import com.tutoras.tutoras.model.MessageErrorResponse;
 import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.security.JwtIssuer;
 import com.tutoras.tutoras.security.UserPrincipal;
@@ -58,7 +58,7 @@ public class AuthService {
     public ResponseEntity<?> attemptLogout(HttpServletRequest request, HttpServletResponse response){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            UnauthorizedErrorResponse errorResponse = new UnauthorizedErrorResponse("The userId should be a number");
+            MessageErrorResponse errorResponse = new MessageErrorResponse("The userId should be a number");
             return ResponseEntity.status(401).body(errorResponse);
         }
         new SecurityContextLogoutHandler().logout(request, response, auth);

@@ -10,15 +10,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ConflictErrorResponse;
+import com.tutoras.tutoras.error.ConflictException;
+import com.tutoras.tutoras.error.ValidationException;
 import com.tutoras.tutoras.model.RegistrationResponse;
-import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.repository.StudentRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
 import com.tutoras.tutoras.repository.UserRepository;
@@ -41,7 +39,6 @@ public class RegistrationServiceTest {
     @InjectMocks
     private RegistrationService registrationService;
 
-    @SuppressWarnings("null")
     @Test
     void attemptRegistration_ShouldReturnUserEmailTextAndCreatedStatus() {
         String email = "teacher@gmail.com";
@@ -56,15 +53,13 @@ public class RegistrationServiceTest {
 
         when(userRepository.save(any(UserEntity.class))).thenReturn(savedUser);
 
-        ResponseEntity<?> response = registrationService.attemptRegistration(email, password, role);
+        RegistrationResponse registrationResponse = registrationService.attemptRegistration(email, password, role);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertTrue(response.getBody() instanceof RegistrationResponse);
-        RegistrationResponse registrationResponse = (RegistrationResponse) response.getBody();
         assertEquals(email, registrationResponse.getText());
+
+        verify(userRepository).save(any(UserEntity.class));
     }
 
-    @SuppressWarnings("null")
     @Test 
     void attemptRegistration_EmailAlreadyExist_ShouldReturnConflictErrorResponseAndConflictStatus(){
         String email = "teacher@gmail.com";
@@ -73,27 +68,20 @@ public class RegistrationServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(new UserEntity(email, password, role)));
 
-        ResponseEntity<?> response = registrationService.attemptRegistration(email, password, role);
+        ConflictException exception = assertThrows(ConflictException.class, () -> {registrationService.attemptRegistration(email, password, role);});
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ConflictErrorResponse);
-        ConflictErrorResponse conflictErrorResponse = (ConflictErrorResponse) response.getBody();
-        assertEquals("Email already exists", conflictErrorResponse.getDetail());
+        assertEquals("Email already exists", exception.getDetail());
     }
 
-    @SuppressWarnings("null")
     @Test
     void attemptRegistration_InvalidEmail_ShouldReturnValidationErrorResponseAndUnprocessableEntityStatus() {
         String email = "invalid-email";
         String password = "12345";
         String role = "ROLE_TEACHER";
         
-        ResponseEntity<?> response = registrationService.attemptRegistration(email, password, role);
+        ValidationException exception = assertThrows(ValidationException.class, () -> {registrationService.attemptRegistration(email, password, role);});
 
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ValidationErrorResponse);
-        ValidationErrorResponse validationErrorResponse = (ValidationErrorResponse) response.getBody();
-        assertEquals("email", validationErrorResponse.getField());
-        assertEquals("The mail is incorrect", validationErrorResponse.getDetail());
+        assertEquals("email", exception.getField());
+        assertEquals("The mail is incorrect", exception.getMessage());
     }
 }

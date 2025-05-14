@@ -3,10 +3,12 @@ package com.tutoras.tutoras.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tutoras.tutoras.model.RegistrationRequest;
+import com.tutoras.tutoras.model.RegistrationResponse;
 import com.tutoras.tutoras.service.RegistrationService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +22,8 @@ public class RegistrationController {
     private final RegistrationService registrationService;
 
     @PostMapping("/auth/registration")
-    public ResponseEntity<?> registration(@RequestBody @Validated RegistrationRequest request) {        
-        return registrationService.attemptRegistration(request.getEmail(), request.getPassword(), request.getRole());
+    public ResponseEntity<RegistrationResponse> registration(@RequestBody @Validated RegistrationRequest request) {        
+        return ResponseEntity.status(HttpStatus.CREATED).body(registrationService.attemptRegistration(request.getEmail(), request.getPassword(), request.getRole()));
     }
     
 }

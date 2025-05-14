@@ -1,6 +1,6 @@
 package com.tutoras.tutoras.model;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import lombok.Data;
 
@@ -9,14 +9,11 @@ public class HomeworkResponse {
     private Long id;
     private String title;
     private String description;
-    private LocalDateTime dueDate;
+    private OffsetDateTime dueDate;
     private String status;
     private Integer grade;
     private Integer assessmentScale;
     private Long studentId;
-    private String studentName;
     private Long lessonId;
-    private String lessonName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-} 
+    private String teacherComment;
+}
