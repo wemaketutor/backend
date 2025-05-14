@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.tutoras.tutoras.model.ConflictErrorResponse;
 import com.tutoras.tutoras.model.MessageErrorResponse;
+import com.tutoras.tutoras.model.UnauthorizeErrorResponse;
 import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.error.*;
 
@@ -29,5 +30,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ConflictErrorResponse> handleConflictError(ConflictException ex) {
         ConflictErrorResponse error = new ConflictErrorResponse(ex.getDetail());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<UnauthorizeErrorResponse> handleUnauthorizeError(UnauthorizedException ex) {
+        UnauthorizeErrorResponse error = new UnauthorizeErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 }

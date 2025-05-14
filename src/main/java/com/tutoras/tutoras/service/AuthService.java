@@ -1,6 +1,5 @@
 package com.tutoras.tutoras.service;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,13 +9,14 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Service;
 
 import com.tutoras.tutoras.model.LoginResponse;
-import com.tutoras.tutoras.model.MessageErrorResponse;
-import com.tutoras.tutoras.model.ValidationErrorResponse;
 import com.tutoras.tutoras.security.JwtIssuer;
 import com.tutoras.tutoras.security.UserPrincipal;
+import com.tutoras.tutoras.error.ResourceNotFoundException;
+import com.tutoras.tutoras.error.ValidationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 
 
@@ -32,10 +32,9 @@ public class AuthService {
         return email != null && email.matches(emailRegex);
     }    
 
-    public ResponseEntity<?> attemptLogin(String email, String password) {
+    public LoginResponse attemptLogin(String email, String password) {
         if (!isValidEmail(email)) {
-            ValidationErrorResponse errorResponse = new ValidationErrorResponse("email", "The mail is incorrect");
-            return ResponseEntity.unprocessableEntity().body(errorResponse);
+            throw new ValidationException("email", "The mail is incorrect");
         }
         var authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(email, password)
@@ -48,20 +47,14 @@ public class AuthService {
             .toList();
 
         var token = jwtIssuer.issue(principal.getUserId(), principal.getEmail(), roles);
-        return ResponseEntity.status(200).body(
-            LoginResponse.builder()
-            .accessToken(token)
-            .build()
-        );
+        return LoginResponse.builder().accessToken(token).build();
     }
 
-    public ResponseEntity<?> attemptLogout(HttpServletRequest request, HttpServletResponse response){
+    public void attemptLogout(HttpServletRequest request, HttpServletResponse response){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            MessageErrorResponse errorResponse = new MessageErrorResponse("The userId should be a number");
-            return ResponseEntity.status(401).body(errorResponse);
+            throw new ResourceNotFoundException("The userId should be a number");
         }
         new SecurityContextLogoutHandler().logout(request, response, auth);
-        return ResponseEntity.status(200).body(null);
     }
 }
