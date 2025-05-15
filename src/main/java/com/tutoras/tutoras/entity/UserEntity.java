@@ -26,12 +26,18 @@ public class UserEntity {
     private String email;
 
     @Column(nullable = true)
+    private String username;
+
+    @Column(nullable = true)
     private String firstName;
+
     @Column(nullable = true)
     private String lastName;
 
     @JsonIgnore
     private String password;
+
+    private String phone;
 
     private String role;
 

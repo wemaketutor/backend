@@ -15,7 +15,7 @@ import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.MaterialRequest;
 import com.tutoras.tutoras.model.MaterialResponse;
 import com.tutoras.tutoras.model.MaterialsResponse;
-import com.tutoras.tutoras.model.UserResponse;
+import com.tutoras.tutoras.model.UserResponse.UserData;
 import com.tutoras.tutoras.repository.MaterialRepository;
 import com.tutoras.tutoras.repository.MaterialVisibleByUserRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
@@ -213,17 +213,17 @@ public class MaterialService {
         List<MaterialVisibleByUserEntity> visibilities = 
                 materialVisibleByUserRepository.findByMaterial(material);
         
-        List<UserResponse> visibleToUsers = new ArrayList<>();
+        List<UserData> visibleToUsers = new ArrayList<>();
         for (MaterialVisibleByUserEntity visibility : visibilities) {
             UserEntity user = visibility.getUser();
-            UserResponse userResponse = new UserResponse();
-            userResponse.setId(user.getId());
-            userResponse.setEmail(user.getEmail());
-            userResponse.setFirstName(user.getFirstName());
-            userResponse.setLastName(user.getLastName());
-            userResponse.setRole(user.getRole());
+            UserData userData = new UserData();
+            userData.setId(user.getId());
+            userData.setEmail(user.getEmail());
+            userData.setFirstName(user.getFirstName());
+            userData.setLastName(user.getLastName());
+            userData.setRole(user.getRole());
             
-            visibleToUsers.add(userResponse);
+            visibleToUsers.add(userData);
         }
         
         response.setVisibleToUsers(visibleToUsers);

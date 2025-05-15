@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tutoras.tutoras.model.LoginRequest;
 import com.tutoras.tutoras.model.LoginResponse;
 import com.tutoras.tutoras.model.ProfileRequest;
+import com.tutoras.tutoras.model.UserResponse;
 import com.tutoras.tutoras.security.UserPrincipal;
 import com.tutoras.tutoras.service.AuthService;
 import com.tutoras.tutoras.service.ProfileService;
@@ -42,8 +43,8 @@ public class AuthController extends BaseController {
     }
     
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
-        return userService.getProfile(principal.getEmail());
+    public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getProfile(principal.getEmail()));
     }
 
     @PutMapping("/profile/update")

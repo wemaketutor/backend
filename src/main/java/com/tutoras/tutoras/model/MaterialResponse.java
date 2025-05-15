@@ -2,6 +2,8 @@ package com.tutoras.tutoras.model;
 
 import java.util.List;
 
+import com.tutoras.tutoras.model.UserResponse.UserData;
+
 import lombok.Data;
 
 @Data
@@ -14,5 +16,5 @@ public class MaterialResponse {
     private Boolean isPublic;
     private Long teacherId;
     private String teacherName;
-    private List<UserResponse> visibleToUsers;
+    private List<UserData> visibleToUsers;
 } 

@@ -6,10 +6,10 @@ import java.util.Optional;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.exception.NotFindedSuchElementException;
 import com.tutoras.tutoras.model.UserResponse;
+import com.tutoras.tutoras.model.UserResponse.UserData;
 import com.tutoras.tutoras.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -24,9 +24,9 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public ResponseEntity<?> getProfile(String email) {
+    public UserResponse getProfile(String email) {
         UserEntity profile = userRepository.findByEmail(email).orElseThrow(() -> new NotFindedSuchElementException("User not found with email: " + email));
-        return ResponseEntity.status(200).body(mapToUserResponse(profile));
+        return mapToUserResponse(profile);
     }
 
     public List<UserResponse> getAllUsers() {
@@ -47,13 +47,16 @@ public class UserService {
     }
     
     private UserResponse mapToUserResponse(UserEntity user) {
+        UserData userData = new UserData();
+        userData.setId(user.getId());
+        userData.setEmail(user.getEmail());
+        userData.setUsername(user.getUsername());
+        userData.setFirstName(user.getFirstName());
+        userData.setLastName(user.getLastName());
+        userData.setPhone(user.getPhone());
+        userData.setRole(user.getRole());
         UserResponse response = new UserResponse();
-        response.setId(user.getId());
-        response.setEmail(user.getEmail());
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
-        response.setRole(user.getRole());
-        response.setAvatar(user.getAvatar());
+        response.setUser(userData);
         return response;
     }
 
