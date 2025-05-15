@@ -21,6 +21,7 @@ import org.mockito.quality.Strictness;
 import com.tutoras.tutoras.entity.CommentEntity;
 import com.tutoras.tutoras.entity.HomeworkCommentEntity;
 import com.tutoras.tutoras.entity.HomeworkEntity;
+import com.tutoras.tutoras.entity.Role;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.CommentRequest;
 import com.tutoras.tutoras.model.CommentResponse;
@@ -57,7 +58,7 @@ public class CommentServiceTest {
     
     @BeforeEach
     void setUp() {
-        testUser = new UserEntity("user@example.com", "password", "teacher");
+        testUser = new UserEntity("user@example.com", "password", Role.fromString("teacher"));
         testUser.setId(1L);
         testUser.setFirstName("Test");
         testUser.setLastName("User");
@@ -142,7 +143,7 @@ public class CommentServiceTest {
         CommentRequest request = new CommentRequest();
         request.setBody("Updated comment");
         
-        UserEntity anotherUser = new UserEntity("another@example.com", "password", "student");
+        UserEntity anotherUser = new UserEntity("another@example.com", "password", Role.fromString("student"));
         anotherUser.setId(2L);
         
         when(commentRepository.findById(1L)).thenReturn(Optional.of(testComment));

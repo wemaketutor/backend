@@ -1,13 +1,11 @@
 package com.tutoras.tutoras.service;
-
-import java.io.IOException;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.tutoras.tutoras.entity.Role;
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.model.ConflictErrorResponse;
+import com.tutoras.tutoras.exception.ConflictException;
+import com.tutoras.tutoras.exception.NotFindedSuchElementException;
+import com.tutoras.tutoras.model.ProfileRequest;
 import com.tutoras.tutoras.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -16,27 +14,36 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    private final ImageService imageService;
     private final UserRepository userRepository;
 
-    public ResponseEntity<?> updateProfile(Long userId, String firstName, String lastName, String extraInfo, MultipartFile avatar) {
-        String avatarFileName = null;
-        if (avatar != null) {
-            try {
-                avatarFileName = imageService.saveImage("./uploads/images/avatars", avatar);
-            } catch (IOException e) {
-                ConflictErrorResponse errorResponse = new ConflictErrorResponse("Ошибка загрузки изображения");
-                return ResponseEntity.status(401).body(errorResponse);
-            }
+    public ProfileRequest updateProfile(Long userId, String username, String firstName, String lastName, String email, String password, String phone, Role role) {
+        UserEntity existingUser = userRepository.findById(userId).orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
+        if (!existingUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+            throw new ConflictException("Already exist user with email:" + email);
         }
-        UserEntity user = userRepository.findById(userId).get();
-        String existedAvatarPath = user.getAvatar();
-        if (existedAvatarPath != null && avatarFileName == null) {
-            avatarFileName = existedAvatarPath;
-        }
-        UserEntity updatedEntity = new UserEntity(userId, firstName, lastName, extraInfo, avatarFileName, user.getEmail(), user.getPassword(), user.getRole(), user.getEvents(), user.getEventsAsFollower());
-        userRepository.save(updatedEntity);
-        return ResponseEntity.ok().build();
 
+        if (username != null && !username.isEmpty()) {existingUser.setUsername(username);} else {username = existingUser.getUsername();}
+        if (firstName != null && !firstName.isEmpty()) {existingUser.setFirstName(firstName);} else {firstName = existingUser.getFirstName();}
+        if (lastName != null && !lastName.isEmpty()) {existingUser.setLastName(lastName);} else {lastName = existingUser.getLastName();}
+        if (email != null && !email.isEmpty()) {existingUser.setEmail(email);} else {email = existingUser.getEmail();}
+        if (phone != null && !phone.isEmpty()) {existingUser.setPhone(phone);} else {phone = existingUser.getPhone();}
+        if (role != null) {existingUser.setRole(role);} else {role = existingUser.getRole();}
+        userRepository.save(existingUser);
+        return ProfileRequest.builder()
+                .id(userId)
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .password("")
+                .phone(phone)
+                .role(role.toValue())
+                .build();
+    }
+
+    public void attemptDeleteProfile(Long userId) {
+        UserEntity existingUser = userRepository.findById(userId).orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
+
+        userRepository.delete(existingUser);
     }
 }

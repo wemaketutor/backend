@@ -19,6 +19,7 @@ import org.mockito.quality.Strictness;
 
 import com.tutoras.tutoras.entity.MaterialEntity;
 import com.tutoras.tutoras.entity.MaterialVisibleByUserEntity;
+import com.tutoras.tutoras.entity.Role;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.MaterialRequest;
@@ -56,7 +57,7 @@ public class MaterialServiceTest {
     
     @BeforeEach
     void setUp() {
-        testTeacherUser = new UserEntity("teacher@example.com", "password", "teacher");
+        testTeacherUser = new UserEntity("teacher@example.com", "password", Role.fromString("teacher"));
         testTeacherUser.setId(1L);
         testTeacherUser.setFirstName("Teacher");
         testTeacherUser.setLastName("Test");
@@ -149,9 +150,9 @@ public class MaterialServiceTest {
         
         when(materialRepository.save(any(MaterialEntity.class))).thenReturn(newMaterial);
         
-        UserEntity user2 = new UserEntity("user2@example.com", "password", "student");
+        UserEntity user2 = new UserEntity("user2@example.com", "password", Role.fromString("student"));
         user2.setId(2L);
-        UserEntity user3 = new UserEntity("user3@example.com", "password", "student");
+        UserEntity user3 = new UserEntity("user3@example.com", "password", Role.fromString("student"));
         user3.setId(3L);
         
         when(userRepository.findById(2L)).thenReturn(Optional.of(user2));

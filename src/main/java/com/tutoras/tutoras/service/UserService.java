@@ -53,8 +53,10 @@ public class UserService {
         userData.setUsername(user.getUsername());
         userData.setFirstName(user.getFirstName());
         userData.setLastName(user.getLastName());
+        userData.setPassword("");
         userData.setPhone(user.getPhone());
-        userData.setRole(user.getRole());
+        userData.setRole(user.getRole().toValue());
+
         UserResponse response = new UserResponse();
         response.setUser(userData);
         return response;

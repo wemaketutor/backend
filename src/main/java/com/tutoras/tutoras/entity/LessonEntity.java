@@ -3,7 +3,6 @@ package com.tutoras.tutoras.entity;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Getter;

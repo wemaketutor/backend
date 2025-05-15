@@ -17,6 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.tutoras.tutoras.entity.Role;
+
 import lombok.RequiredArgsConstructor;
 
 
@@ -45,12 +47,12 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/auth/*").anonymous()
                                 .requestMatchers("/images/avatars/**").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/teacher/**").hasRole("TEACHER")
-                                .requestMatchers("/api/student/**").hasRole("STUDENT")
-                                .requestMatchers("/api/myteacher/**").hasRole("STUDENT")
-                                .requestMatchers("/api/mystudent/**").hasRole("TEACHER")
-                                .requestMatchers("/api/profile").authenticated()
+                                .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.toValue())
+                                .requestMatchers("/api/teacher/**").hasRole(Role.TEACHER.toValue())
+                                .requestMatchers("/api/student/**").hasRole(Role.STUDENT.toValue())
+                                .requestMatchers("/api/myteacher/**").hasRole(Role.STUDENT.toValue())
+                                .requestMatchers("/api/mystudent/**").hasRole(Role.TEACHER.toValue())
+                                .requestMatchers("/api/profile/**").authenticated()
                                 .anyRequest().authenticated()
                 );
 

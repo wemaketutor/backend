@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tutoras.tutoras.entity.Role;
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
@@ -30,7 +31,7 @@ public class RegistrationService {
         return email != null && email.matches(emailRegex);
     }    
 
-    public RegistrationResponse attemptRegistration(String email, String password, String role) {
+    public RegistrationResponse attemptRegistration(String email, String password, Role role) {
         if (!isValidEmail(email)) {
             throw new ValidationException("email", "The mail is incorrect");
         }
@@ -42,10 +43,10 @@ public class RegistrationService {
         UserEntity user = new UserEntity(email, encodedPassword, role);
         userRepository.save(user);
 
-        if (role.equals("ROLE_TEACHER")) {
+        if (Role.TEACHER.equals(role)) {
             TeacherEntity teacher = new TeacherEntity(user.getId(), user, new ArrayList<>());
             teacherRepository.save(teacher);
-        } else if (role.equals("ROLE_STUDENT")) {
+        } else if (Role.STUDENT.equals(role)) {
             StudentEntity student = new StudentEntity(user.getId(), user, new ArrayList<>());
             studentRepository.save(student);
         }

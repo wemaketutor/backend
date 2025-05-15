@@ -39,10 +39,7 @@ public class UserEntity {
 
     private String phone;
 
-    private String role;
-
-    @Column(nullable = true)
-    private String extraInfo;
+    private Role role;
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -52,12 +49,10 @@ public class UserEntity {
     @JsonIgnore
     private List<EventEntity> eventsAsFollower;
 
-    private String avatar;
-
     @SuppressWarnings("unused")
     private UserEntity () {}
 
-    public UserEntity(String email, String password, String role) {
+    public UserEntity(String email, String password, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;
@@ -71,14 +66,12 @@ public class UserEntity {
         String avatar, 
         String email, 
         String password, 
-        String role, 
+        Role role, 
         List<EventEntity> events, 
         List<EventEntity> eventsAsFollower) {
             this.id = id;
             this.firstName = firstName;
             this.lastName = lastName;
-            this.extraInfo = extraInfo;
-            this.avatar = avatar;
             this.email = email;
             this.password = password;
             this.role = role;

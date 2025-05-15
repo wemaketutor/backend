@@ -1,6 +1,8 @@
 package com.tutoras.tutoras.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.tutoras.tutoras.entity.Role;
 import com.tutoras.tutoras.model.LoginRequest;
 import com.tutoras.tutoras.model.LoginResponse;
 import com.tutoras.tutoras.model.ProfileRequest;
@@ -20,8 +22,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
@@ -37,7 +40,7 @@ public class AuthController extends BaseController {
         return ResponseEntity.status(HttpStatus.OK).body(authService.attemptLogin(request.getEmail(), request.getPassword()));
     }
 
-    @GetMapping("/auth/logout")
+    @PostMapping("/auth/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         authService.attemptLogout(request, response);
     }
@@ -47,15 +50,27 @@ public class AuthController extends BaseController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getProfile(principal.getEmail()));
     }
 
-    @PutMapping("/profile/update")
-    public ResponseEntity<?> updateProfile(
-        @AuthenticationPrincipal UserPrincipal principal, 
-        @ModelAttribute ProfileRequest request) {
-        return profileService.updateProfile(
+    @PutMapping("/profile/{email}")
+    public ResponseEntity<ProfileRequest> updateProfile(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("email") String email, 
+        @RequestBody ProfileRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(profileService.updateProfile(
             principal.getUserId(), 
+            request.getUsername(),
             request.getFirstName(), 
             request.getLastName(), 
-            request.getExtraInfo(), 
-            request.getAvatar());
+            request.getEmail(),
+            request.getPassword(),
+            request.getPhone(), 
+            Role.fromString(request.getRole())));
     }    
+
+    @DeleteMapping("/profile/{email}")
+    public ResponseEntity<Void> deleteProfile(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("email") String email) {
+            profileService.attemptDeleteProfile(principal.getUserId());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
 }

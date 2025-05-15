@@ -221,7 +221,7 @@ public class MaterialService {
             userData.setEmail(user.getEmail());
             userData.setFirstName(user.getFirstName());
             userData.setLastName(user.getLastName());
-            userData.setRole(user.getRole());
+            userData.setRole(user.getRole().toValue());
             
             visibleToUsers.add(userData);
         }
