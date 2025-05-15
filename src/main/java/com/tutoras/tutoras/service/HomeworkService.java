@@ -1,6 +1,7 @@
 package com.tutoras.tutoras.service;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class HomeworkService {
     @Autowired
     private EventRepository eventRepository;
     
-    public ResponseEntity<?> getHomeworksForStudentFromTeacher(Long studentId, Long teacherId, int page, int perPage, String sort_by, String sort_order) {
+    public HomeworksResponse getHomeworksForStudentFromTeacher(Long studentId, Long teacherId, int page, int perPage, String sort_by, String sort_order) {
         if (!studentRepository.findById(teacherId).isPresent()){
             
         }
@@ -160,7 +161,7 @@ public class HomeworkService {
             homework.setLesson(lesson);
         }
         
-        homework.setUpdatedAt(LocalDateTime.now());
+        homework.setUpdatedAt(OffsetDateTime.now());
         
         HomeworkEntity updatedHomework = homeworkRepository.save(homework);
         
@@ -183,7 +184,7 @@ public class HomeworkService {
         
         HomeworkStatus homeworkStatus = HomeworkStatus.valueOf(status.toUpperCase());
         homework.setStatus(homeworkStatus);
-        homework.setUpdatedAt(LocalDateTime.now());
+        homework.setUpdatedAt(OffsetDateTime.now());
         
         HomeworkEntity updatedHomework = homeworkRepository.save(homework);
         

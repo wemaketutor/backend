@@ -1,4 +1,4 @@
-package com.tutoras.tutoras.error;
+package com.tutoras.tutoras.exception;
 
 public class UnauthorizedException extends RuntimeException {
     private final String message;

@@ -14,8 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.tutoras.tutoras.entity.UserEntity;
-import com.tutoras.tutoras.error.ConflictException;
-import com.tutoras.tutoras.error.ValidationException;
+import com.tutoras.tutoras.exception.ConflictException;
+import com.tutoras.tutoras.exception.ValidationException;
 import com.tutoras.tutoras.model.RegistrationResponse;
 import com.tutoras.tutoras.repository.StudentRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;

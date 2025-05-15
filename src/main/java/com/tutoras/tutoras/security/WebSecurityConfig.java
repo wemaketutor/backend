@@ -42,9 +42,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(registry -> registry
                                 .requestMatchers("/api/").permitAll()
                                 .requestMatchers("/api/auth/logout").authenticated()
-                                .requestMatchers("/api/auth/").anonymous()
+                                .requestMatchers("/api/auth/*").anonymous()
                                 .requestMatchers("/images/avatars/**").permitAll()
-                                .requestMatchers("/api/registration").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")

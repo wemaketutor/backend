@@ -1,6 +1,6 @@
 package com.tutoras.tutoras.entity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,7 +28,7 @@ public class HomeworkEntity {
     private String description;
     
     @Column(nullable = false)
-    private LocalDateTime dueDate;
+    private OffsetDateTime dueDate;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,14 +47,14 @@ public class HomeworkEntity {
     @JoinColumn(name = "lesson_id")
     private EventEntity lesson;
     
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     
     @SuppressWarnings("unused")
     private HomeworkEntity() {}
     
-    public HomeworkEntity(String title, String description, LocalDateTime dueDate, 
+    public HomeworkEntity(String title, String description, OffsetDateTime dueDate, 
                          HomeworkStatus status, Integer assessmentScale, 
                          StudentEntity student, EventEntity lesson) {
         this.title = title;
@@ -64,7 +64,7 @@ public class HomeworkEntity {
         this.assessmentScale = assessmentScale;
         this.student = student;
         this.lesson = lesson;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 } 

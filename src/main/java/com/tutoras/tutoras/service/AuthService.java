@@ -8,11 +8,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
+import com.tutoras.tutoras.exception.ResourceNotFoundException;
+import com.tutoras.tutoras.exception.ValidationException;
 import com.tutoras.tutoras.model.LoginResponse;
 import com.tutoras.tutoras.security.JwtIssuer;
 import com.tutoras.tutoras.security.UserPrincipal;
-import com.tutoras.tutoras.error.ResourceNotFoundException;
-import com.tutoras.tutoras.error.ValidationException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

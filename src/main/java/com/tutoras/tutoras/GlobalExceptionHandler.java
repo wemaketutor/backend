@@ -9,7 +9,7 @@ import com.tutoras.tutoras.model.ConflictErrorResponse;
 import com.tutoras.tutoras.model.MessageErrorResponse;
 import com.tutoras.tutoras.model.UnauthorizeErrorResponse;
 import com.tutoras.tutoras.model.ValidationErrorResponse;
-import com.tutoras.tutoras.error.*;
+import com.tutoras.tutoras.exception.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -36,5 +36,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<UnauthorizeErrorResponse> handleUnauthorizeError(UnauthorizedException ex) {
         UnauthorizeErrorResponse error = new UnauthorizeErrorResponse(ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(NotFindedSuchElementException.class)
+    public ResponseEntity<String> handleNotSuchElementException(NotFindedSuchElementException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }

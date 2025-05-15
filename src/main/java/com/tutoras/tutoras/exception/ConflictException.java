@@ -1,4 +1,4 @@
-package com.tutoras.tutoras.error;
+package com.tutoras.tutoras.exception;
 
 public class ConflictException extends RuntimeException {
     private final String detail;

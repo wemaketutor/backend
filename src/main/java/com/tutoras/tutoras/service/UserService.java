@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import com.tutoras.tutoras.entity.UserEntity;
+import com.tutoras.tutoras.exception.NotFindedSuchElementException;
 import com.tutoras.tutoras.model.UserResponse;
 import com.tutoras.tutoras.repository.UserRepository;
 
@@ -24,7 +25,7 @@ public class UserService {
     }
 
     public ResponseEntity<?> getProfile(String email) {
-        UserEntity profile = userRepository.findByEmail(email).orElseThrow();
+        UserEntity profile = userRepository.findByEmail(email).orElseThrow(() -> new NotFindedSuchElementException("User not found with email: " + email));
         return ResponseEntity.status(200).body(mapToUserResponse(profile));
     }
 

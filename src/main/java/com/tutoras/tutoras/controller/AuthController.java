@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController extends BaseController {
 
     private final AuthService authService;
     private final UserService userService;

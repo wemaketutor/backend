@@ -16,4 +16,9 @@ public class HomeworkResponse {
     private Long studentId;
     private Long lessonId;
     private String teacherComment;
+
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
+    private String studentName;
+    private String lessonName;
 }

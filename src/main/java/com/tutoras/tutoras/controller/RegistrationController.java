@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
-public class RegistrationController {
+public class RegistrationController extends BaseController {
 
     private final RegistrationService registrationService;
 
-    @PostMapping("/auth/registration")
+    @PostMapping("/auth/register")
     public ResponseEntity<RegistrationResponse> registration(@RequestBody @Validated RegistrationRequest request) {        
         return ResponseEntity.status(HttpStatus.CREATED).body(registrationService.attemptRegistration(request.getEmail(), request.getPassword(), request.getRole()));
     }

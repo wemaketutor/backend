@@ -15,7 +15,7 @@ public class HomeworkController {
     private HomeworkService homeworkService;
     
     @GetMapping("/homeworks")
-    public ResponseEntity<?> getAllHomeworks(
+    public ResponseEntity<HomeworksResponse> getAllHomeworks(
             @RequestParam(required = true) Long studentId,
             @RequestParam(required = false) Long teacherId,
             @RequestParam(defaultValue = "dueDate") String sort_by,
@@ -24,13 +24,13 @@ public class HomeworkController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int per_page) {
         
-        if (teacherId != null) {
+        // if (teacherId != null) {
             //возвращаем дз studentId от teacherId
-            return homeworkService.getHomeworksForStudentFromTeacher(studentId, teacherId, page, per_page, sort_by, sort_order);
-        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body(homeworkService.getHomeworksForStudentFromTeacher(studentId, teacherId, page, per_page, sort_by, sort_order));
+        // } else {
             // возвращаем все дз studentId
-            return homeworkService.getHomeworksByStudent(studentId, page, per_page);
-        }
+            // return homeworkService.getHomeworksByStudent(studentId, page, per_page);
+        // }
     }
     
     @GetMapping("/homeworks/{homework_id}")
