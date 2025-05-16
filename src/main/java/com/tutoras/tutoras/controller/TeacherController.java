@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequiredArgsConstructor
-public class TeacherController {
+public class TeacherController extends BaseController {
 
     private final TeacherService teacherService;
 

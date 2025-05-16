@@ -12,10 +12,10 @@ import com.tutoras.tutoras.entity.MaterialEntity;
 import com.tutoras.tutoras.entity.MaterialVisibleByUserEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
+import com.tutoras.tutoras.exception.NotFindedSuchElementException;
 import com.tutoras.tutoras.model.MaterialRequest;
 import com.tutoras.tutoras.model.MaterialResponse;
 import com.tutoras.tutoras.model.MaterialsResponse;
-import com.tutoras.tutoras.model.UserResponse.UserData;
 import com.tutoras.tutoras.repository.MaterialRepository;
 import com.tutoras.tutoras.repository.MaterialVisibleByUserRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
@@ -103,7 +103,7 @@ public class MaterialService {
     
     public MaterialResponse getMaterialById(Long id) {
         MaterialEntity material = materialRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Material not found with id: " + id));
+                .orElseThrow(() -> new NotFindedSuchElementException("Material not found with id: " + id));
         
         return mapToMaterialResponse(material);
     }
@@ -111,11 +111,10 @@ public class MaterialService {
     @Transactional
     public MaterialResponse createMaterial(MaterialRequest request, Long teacherId) {
         TeacherEntity teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new EntityNotFoundException("Teacher not found with id: " + teacherId));
+                .orElseThrow(() -> new NotFindedSuchElementException("Teacher not found with id: " + teacherId));
         
         MaterialEntity material = new MaterialEntity(
                 request.getTitle(),
-                request.getSubject(),
                 request.getDescription(),
                 request.getFileUrl(),
                 request.getIsPublic(),
@@ -124,10 +123,10 @@ public class MaterialService {
         
         MaterialEntity savedMaterial = materialRepository.save(material);
         
-        if (!request.getIsPublic() && request.getVisibleToUserIds() != null && !request.getVisibleToUserIds().isEmpty()) {
-            for (Long userId : request.getVisibleToUserIds()) {
+        if (!request.getIsPublic() && request.getStudentIds() != null && !request.getStudentIds().isEmpty()) {
+            for (Long userId : request.getStudentIds()) {
                 UserEntity user = userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+                        .orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
                 
                 MaterialVisibleByUserEntity visibility = new MaterialVisibleByUserEntity(savedMaterial, user);
                 materialVisibleByUserRepository.save(visibility);
@@ -146,10 +145,6 @@ public class MaterialService {
             material.setTitle(request.getTitle());
         }
         
-        if (request.getSubject() != null) {
-            material.setSubject(request.getSubject());
-        }
-        
         if (request.getDescription() != null) {
             material.setDescription(request.getDescription());
         }
@@ -164,14 +159,14 @@ public class MaterialService {
         
         MaterialEntity updatedMaterial = materialRepository.save(material);
         
-        if (request.getVisibleToUserIds() != null) {
+        if (request.getStudentIds() != null) {
             List<MaterialVisibleByUserEntity> currentVisibilities = 
                     materialVisibleByUserRepository.findByMaterial(updatedMaterial);
             materialVisibleByUserRepository.deleteAll(currentVisibilities);
             
-            for (Long userId : request.getVisibleToUserIds()) {
+            for (Long userId : request.getStudentIds()) {
                 UserEntity user = userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+                        .orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
                 
                 MaterialVisibleByUserEntity visibility = new MaterialVisibleByUserEntity(updatedMaterial, user);
                 materialVisibleByUserRepository.save(visibility);
@@ -184,7 +179,7 @@ public class MaterialService {
     @Transactional
     public void deleteMaterial(Long id) {
         if (!materialRepository.existsById(id)) {
-            throw new EntityNotFoundException("Material not found with id: " + id);
+            throw new NotFindedSuchElementException("Material not found with id: " + id);
         }
         
 
@@ -199,34 +194,24 @@ public class MaterialService {
         MaterialResponse response = new MaterialResponse();
         response.setId(material.getId());
         response.setTitle(material.getTitle());
-        response.setSubject(material.getSubject());
         response.setDescription(material.getDescription());
         response.setFileUrl(material.getFileUrl());
         response.setIsPublic(material.getIsPublic());
         
         if (material.getTeacher() != null) {
             response.setTeacherId(material.getTeacher().getTeacherId());
-            response.setTeacherName(material.getTeacher().getUser().getFirstName() + " " + 
-                                   material.getTeacher().getUser().getLastName());
         }
         
         List<MaterialVisibleByUserEntity> visibilities = 
                 materialVisibleByUserRepository.findByMaterial(material);
         
-        List<UserData> visibleToUsers = new ArrayList<>();
+        List<Long> visibleToUsers = new ArrayList<>();
         for (MaterialVisibleByUserEntity visibility : visibilities) {
-            UserEntity user = visibility.getUser();
-            UserData userData = new UserData();
-            userData.setId(user.getId());
-            userData.setEmail(user.getEmail());
-            userData.setFirstName(user.getFirstName());
-            userData.setLastName(user.getLastName());
-            userData.setRole(user.getRole().toValue());
-            
-            visibleToUsers.add(userData);
+            UserEntity user = visibility.getUser();           
+            visibleToUsers.add(user.getId());
         }
         
-        response.setVisibleToUsers(visibleToUsers);
+        response.setStudentIds(visibleToUsers);
         
         return response;
     }

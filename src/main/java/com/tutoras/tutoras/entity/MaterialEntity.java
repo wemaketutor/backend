@@ -17,9 +17,6 @@ public class MaterialEntity {
     @Column(nullable = false)
     private String title;
     
-    @Column(nullable = false)
-    private String subject;
-    
     private String description;
     
     @Column(nullable = false)
@@ -35,10 +32,9 @@ public class MaterialEntity {
     @SuppressWarnings("unused")
     private MaterialEntity() {}
     
-    public MaterialEntity(String title, String subject, String description, 
+    public MaterialEntity(String title, String description, 
                          String fileUrl, Boolean isPublic, TeacherEntity teacher) {
         this.title = title;
-        this.subject = subject;
         this.description = description;
         this.fileUrl = fileUrl;
         this.isPublic = isPublic;

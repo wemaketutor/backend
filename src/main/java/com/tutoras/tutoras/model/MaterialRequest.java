@@ -7,9 +7,8 @@ import lombok.Data;
 @Data
 public class MaterialRequest {
     private String title;
-    private String subject;
     private String description;
     private String fileUrl;
     private Boolean isPublic;
-    private List<Long> visibleToUserIds;
+    private List<Long> studentIds;
 } 

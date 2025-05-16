@@ -54,6 +54,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/myteacher/**").hasRole(Role.STUDENT.name())
                                 .requestMatchers("/api/mystudent/**").hasRole(Role.TEACHER.name())
                                 .requestMatchers(HttpMethod.POST, "/api/material/*").hasRole(Role.TEACHER.name())
+                                .requestMatchers(HttpMethod.DELETE, "/api/materials/*").hasRole(Role.TEACHER.name())
                                 .requestMatchers("/api/profile/**").authenticated()
                                 .anyRequest().authenticated()
                 );

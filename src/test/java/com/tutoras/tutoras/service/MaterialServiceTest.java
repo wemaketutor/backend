@@ -69,7 +69,6 @@ public class MaterialServiceTest {
         testMaterial = mock(MaterialEntity.class);
         when(testMaterial.getId()).thenReturn(1L);
         when(testMaterial.getTitle()).thenReturn("Test Material");
-        when(testMaterial.getSubject()).thenReturn("Math");
         when(testMaterial.getDescription()).thenReturn("This is a test material description");
         when(testMaterial.getFileUrl()).thenReturn("http://example.com/test-material.pdf");
         when(testMaterial.getIsPublic()).thenReturn(true);
@@ -86,12 +85,10 @@ public class MaterialServiceTest {
         assertNotNull(response);
         assertEquals(1L, response.getId());
         assertEquals("Test Material", response.getTitle());
-        assertEquals("Math", response.getSubject());
         assertEquals("This is a test material description", response.getDescription());
         assertEquals("http://example.com/test-material.pdf", response.getFileUrl());
         assertTrue(response.getIsPublic());
         assertEquals(1L, response.getTeacherId());
-        assertEquals("Teacher Test", response.getTeacherName());
         
         verify(materialRepository, times(1)).findById(1L);
         verify(materialVisibleByUserRepository, times(1)).findByMaterial(testMaterial);
@@ -130,19 +127,17 @@ public class MaterialServiceTest {
     void createMaterial_ShouldCreateAndReturnMaterial() {
         MaterialRequest request = new MaterialRequest();
         request.setTitle("New Material");
-        request.setSubject("Chemistry");
         request.setDescription("New material description");
         request.setFileUrl("http://example.com/new-material.pdf");
         request.setIsPublic(false);
         List<Long> visibleToUserIds = Arrays.asList(2L, 3L);
-        request.setVisibleToUserIds(visibleToUserIds);
+        request.setStudentIds(visibleToUserIds);
         
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(testTeacher));
         
         MaterialEntity newMaterial = mock(MaterialEntity.class);
         when(newMaterial.getId()).thenReturn(2L);
         when(newMaterial.getTitle()).thenReturn("New Material");
-        when(newMaterial.getSubject()).thenReturn("Chemistry");
         when(newMaterial.getDescription()).thenReturn("New material description");
         when(newMaterial.getFileUrl()).thenReturn("http://example.com/new-material.pdf");
         when(newMaterial.getIsPublic()).thenReturn(false);
@@ -165,7 +160,6 @@ public class MaterialServiceTest {
         assertNotNull(response);
         assertEquals(2L, response.getId());
         assertEquals("New Material", response.getTitle());
-        assertEquals("Chemistry", response.getSubject());
         assertEquals("New material description", response.getDescription());
         assertEquals("http://example.com/new-material.pdf", response.getFileUrl());
         assertFalse(response.getIsPublic());
