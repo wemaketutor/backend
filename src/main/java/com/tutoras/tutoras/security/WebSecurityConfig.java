@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,11 +48,12 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/auth/*").anonymous()
                                 .requestMatchers("/images/avatars/**").permitAll()
                                 .requestMatchers("/actuator/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.toValue())
-                                .requestMatchers("/api/teacher/**").hasRole(Role.TEACHER.toValue())
-                                .requestMatchers("/api/student/**").hasRole(Role.STUDENT.toValue())
-                                .requestMatchers("/api/myteacher/**").hasRole(Role.STUDENT.toValue())
-                                .requestMatchers("/api/mystudent/**").hasRole(Role.TEACHER.toValue())
+                                .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+                                .requestMatchers("/api/teacher/**").hasRole(Role.TEACHER.name())
+                                .requestMatchers("/api/student/**").hasRole(Role.STUDENT.name())
+                                .requestMatchers("/api/myteacher/**").hasRole(Role.STUDENT.name())
+                                .requestMatchers("/api/mystudent/**").hasRole(Role.TEACHER.name())
+                                .requestMatchers(HttpMethod.POST, "/api/material/*").hasRole(Role.TEACHER.name())
                                 .requestMatchers("/api/profile/**").authenticated()
                                 .anyRequest().authenticated()
                 );

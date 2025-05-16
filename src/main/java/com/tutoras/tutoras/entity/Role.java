@@ -8,6 +8,10 @@ public enum Role {
     TEACHER,
     ADMIN;
 
+    public String getAuthority() {
+        return "ROLE_" + this.name();
+    }
+
     @JsonCreator
     public static Role fromString(String value) {
         return Role.valueOf(value.toUpperCase());
