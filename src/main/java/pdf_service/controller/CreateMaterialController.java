@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import pdf_service.model.CreateMaterialRequest;
+import pdf_service.model.Role;
 import pdf_service.serivce.CreateMaterialService;
 
 
@@ -37,7 +38,9 @@ public class CreateMaterialController {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (!roles.contains("ROLE_TEACHER")) {
+        boolean isTeacher = roles.stream().anyMatch(role -> role.equals(Role.ROLE_TEACHER.name()));
+
+        if (!isTeacher) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Only teachers can create materials");
         }
