@@ -26,6 +26,26 @@ public class MinioService {
                 .build();
     }
 
+    public boolean fileExists(String bucketName, String objectName) throws IOException {
+        try {
+            minioClient.statObject(
+                StatObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .build()
+            );
+            return true;
+        } catch (ErrorResponseException e) {
+            if (e.errorResponse().code().equals("NoSuchKey")) {
+                return false;
+            }
+            throw new IOException("MinIO operation failed", e);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | 
+                 MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO operation failed", e);
+        }
+    }
+
     public void uploadFile(String bucketName, String objectName, String filePath)
             throws IOException, MinioException {
         try {

@@ -39,6 +39,14 @@ public class PdfGeneratorService {
     }
 
     public String generatePdf(SourceEntity source) throws IOException, MinioException {
+        String contentHash = Integer.toHexString(source.getBody().hashCode());
+        String pdfName = "material_" + contentHash + ".pdf";
+
+        // checks if it was already compiled before
+        if (minioService.fileExists("materials", pdfName)) {
+            return minioService.getFileUrl("materials", pdfName);
+        }
+
         Path resFile = tempDir.resolve("res.tex");
         Files.write(resFile, source.getBody().getBytes());
 
@@ -47,7 +55,6 @@ public class PdfGeneratorService {
         compileLatex(tempDir.toString(), mainTex.toString());
 
         // update to minio
-        String pdfName = "material_" + UUID.randomUUID() + ".pdf";
         Path pdfFile = tempDir.resolve("main.pdf");
         minioService.uploadFile("materials", pdfName, pdfFile.toString());
 
