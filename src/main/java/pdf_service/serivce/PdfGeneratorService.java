@@ -38,13 +38,14 @@ public class PdfGeneratorService {
         copyTemplateToTemp("style.tex", tempDir);
     }
 
-    public String generatePdf(SourceEntity source) throws IOException, MinioException {
+    @Async
+    public CompletableFuture<String> generatePdf(SourceEntity source) throws IOException, MinioException {
         String contentHash = Integer.toHexString(source.getBody().hashCode());
         String pdfName = "material_" + contentHash + ".pdf";
 
         // checks if it was already compiled before
         if (minioService.fileExists("materials", pdfName)) {
-            return minioService.getFileUrl("materials", pdfName);
+            return CompletableFuture.completedFuture(minioService.getFileUrl("materials", pdfName));
         }
 
         Path resFile = tempDir.resolve("res.tex");
@@ -61,7 +62,7 @@ public class PdfGeneratorService {
         Files.deleteIfExists(resFile);
         Files.deleteIfExists(pdfFile);
 
-        return minioService.getFileUrl("materials", pdfName);
+        return CompletableFuture.completedFuture(minioService.getFileUrl("materials", pdfName));
     }
 
     public SourceEntity generateCombinedSource(ArrayList<SourceEntity> sources) {

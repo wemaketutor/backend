@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import pdf_service.model.CreateMaterialRequest;
 import pdf_service.serivce.CreateMaterialService;
 
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/materials/generate-pdf")
@@ -23,7 +24,7 @@ public class CreateMaterialController {
     private final AuthService authService;
 
     @PostMapping
-    public ResponseEntity<?> createMaterial(
+    public CompletableFuture<ResponseEntity<?>> createMaterial(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CreateMaterialRequest request
     ) {

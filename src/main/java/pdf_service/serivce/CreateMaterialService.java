@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import java.io.IOException;
 import io.minio.errors.MinioException;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class CreateMaterialService {
     private final PdfGeneratorService pdfGeneratorService;
     private final AuthenticationManager authenticationManager;
 
-    public Long createMaterial(Long teacherId, CreateMaterialRequest request)
+    public CompletableFuture<Long> createMaterial(Long teacherId, CreateMaterialRequest request)
             throws IOException, MinioException {
 
         ArrayList<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
