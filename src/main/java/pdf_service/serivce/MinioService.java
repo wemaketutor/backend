@@ -1,12 +1,14 @@
 package pdf_service.serivce;
 
-import io.minio.MinioClient;
-import io.minio.errors.MinioException;
+import io.minio.*;
+import io.minio.errors.*;
+import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MinioService {
@@ -44,8 +46,9 @@ public class MinioService {
                             .object(objectName)
                             .filename(filePath)
                             .build());
-        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
-            throw new IOException("MinIO client error", e);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | 
+                 MinioException | IllegalArgumentException e) {
+            throw new IOException("MinIO operation failed", e);
         }
     }
 

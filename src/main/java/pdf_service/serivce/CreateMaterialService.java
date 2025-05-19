@@ -13,6 +13,9 @@ import pdf_service.repository.CreateMaterialRepository;
 
 import java.util.ArrayList;
 
+import java.io.IOException;
+import io.minio.errors.MinioException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +25,8 @@ public class CreateMaterialService {
     private final PdfGeneratorService pdfGeneratorService;
     private final AuthenticationManager authenticationManager;
 
-    public Long createMaterial(Long teacherId, CreateMaterialRequest request) {
+    public Long createMaterial(Long teacherId, CreateMaterialRequest request)
+            throws IOException, MinioException {
 
         ArrayList<SourceEntity> sources = materialRepository.getAllByIds(request.getSources_id());
         if (sources.isEmpty()) {

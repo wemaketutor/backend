@@ -2,6 +2,7 @@ package pdf_service.serivce;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 import pdf_service.entity.SourceEntity;
 
 import java.io.*;
@@ -14,7 +15,11 @@ import java.util.UUID;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import io.minio.errors.MinioException;
 import java.nio.file.*;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class PdfGeneratorService {
@@ -22,8 +27,9 @@ public class PdfGeneratorService {
     private final MinioService minioService;
     private final Path tempDir;
 
-    public PdfGeneratorService(MinioService minioService) {
+    public PdfGeneratorService(MinioService minioService) throws IOException{
         this.minioService = minioService;
+
         //organizing the temp directory
         this.tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "latex");
         Files.createDirectories(tempDir);
@@ -32,9 +38,9 @@ public class PdfGeneratorService {
         copyTemplateToTemp("style.tex", tempDir);
     }
 
-    public String generatePdf(SourseEntity source) throws IOException {
+    public String generatePdf(SourceEntity source) throws IOException, MinioException {
         Path resFile = tempDir.resolve("res.tex");
-        Files.write(source.getBody().getBytes());
+        Files.write(resFile, source.getBody().getBytes());
 
         // compiling
         Path mainTex = tempDir.resolve("main.tex");
@@ -77,8 +83,15 @@ public class PdfGeneratorService {
                 texFile
         );
         pb.directory(new File(workingDir));
-        Process process = pb.start();
-        int exitCode = process.waitFor();
-        if (exitCode != 0) throw new IOException("LaTeX compilation failed");
+        try {
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IOException("LaTeX compilation failed with exit code " + exitCode);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("LaTeX compilation interrupted", e);
+        }
     }
 }

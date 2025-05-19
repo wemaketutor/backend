@@ -47,7 +47,12 @@ public class CreateMaterialController {
                     .body("Invalid request data");
         }
 
-        Long materialId = createMaterialService.createMaterial(principal.getUserId(), request);
-        return ResponseEntity.ok(materialId);
+        try {
+            Long materialId = createMaterialService.createMaterial(principal.getUserId(), request);
+            return ResponseEntity.ok(materialId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to generate PDF");
+        }
     }
 }
