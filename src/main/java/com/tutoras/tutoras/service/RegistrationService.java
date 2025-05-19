@@ -1,7 +1,5 @@
 package com.tutoras.tutoras.service;
 
-import java.util.ArrayList;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,12 +42,15 @@ public class RegistrationService {
         userRepository.save(user);
 
         if (Role.TEACHER.equals(role)) {
-            TeacherEntity teacher = new TeacherEntity(user.getId(), user, new ArrayList<>());
+            TeacherEntity teacher = new TeacherEntity(user);
             teacherRepository.save(teacher);
+            user.setTeacherId(teacher.getId());
         } else if (Role.STUDENT.equals(role)) {
-            StudentEntity student = new StudentEntity(user.getId(), user, new ArrayList<>());
+            StudentEntity student = new StudentEntity(user);
             studentRepository.save(student);
+            user.setStudentId(student.getId());
         }
+        userRepository.save(user);
         
         return RegistrationResponse.builder().text(user.getEmail()).build();
     }

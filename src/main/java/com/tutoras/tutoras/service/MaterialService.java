@@ -199,7 +199,7 @@ public class MaterialService {
         response.setIsPublic(material.getIsPublic());
         
         if (material.getTeacher() != null) {
-            response.setTeacherId(material.getTeacher().getTeacherId());
+            response.setTeacherId(material.getTeacher().getId());
         }
         
         List<MaterialVisibleByUserEntity> visibilities = 

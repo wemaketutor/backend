@@ -1,16 +1,16 @@
 package com.tutoras.tutoras.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,26 +22,22 @@ import lombok.Setter;
 public class TeacherEntity {
 
     @Id
-    private Long teacherId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @ManyToMany(mappedBy = "teachers")
-    @JsonManagedReference
-    @JsonIgnore
-    private List<StudentEntity> students = new ArrayList<>();
-
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    private String subjects;
+    @OneToMany(mappedBy = "teacher")
+    @JsonIgnore
+    private List<LessonEntity> lessons;
 
     @SuppressWarnings("unused")
     private TeacherEntity () {}
 
-    public TeacherEntity (Long teacherId, UserEntity user, List<StudentEntity> students) {
-        this.teacherId = teacherId;
+    public TeacherEntity (UserEntity user) {
         this.user = user;
-        this.students = students;
     }
 
 }

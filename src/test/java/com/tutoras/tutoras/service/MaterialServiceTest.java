@@ -63,7 +63,7 @@ public class MaterialServiceTest {
         testTeacherUser.setLastName("Test");
         
         testTeacher = mock(TeacherEntity.class);
-        when(testTeacher.getTeacherId()).thenReturn(1L);
+        when(testTeacher.getId()).thenReturn(1L);
         when(testTeacher.getUser()).thenReturn(testTeacherUser);
         
         testMaterial = mock(MaterialEntity.class);

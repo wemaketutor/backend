@@ -16,7 +16,7 @@ public class StudentService {
     public StudentResponse getStudentsTeachers(Long studentId) {
         StudentEntity student = studentRepository.findById(studentId).orElseThrow();
         return StudentResponse.builder()
-            .teachers(student.getTeachers())
+            .teachers(student.getUser().getTeachers())
             .build();
     }
 }

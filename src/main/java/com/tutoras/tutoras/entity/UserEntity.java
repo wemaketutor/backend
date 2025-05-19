@@ -41,6 +41,10 @@ public class UserEntity {
 
     private Role role;
 
+    private Long teacherId;
+
+    private Long studentId;
+
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<EventEntity> events;
@@ -48,6 +52,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "folowed_user")
     @JsonIgnore
     private List<EventEntity> eventsAsFollower;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<StudentEntity> students;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<TeacherEntity> teachers;
 
     @SuppressWarnings("unused")
     private UserEntity () {}

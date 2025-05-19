@@ -1,8 +1,12 @@
 package com.tutoras.tutoras.entity;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,16 +28,12 @@ public class LessonEntity {
 
     private String subject;
 
-    @ManyToOne
-    @JoinColumn(name = "teacherId", nullable = false)
-    private TeacherEntity teacher;
-
     private OffsetDateTime starTime;
 
     private OffsetDateTime endTime;
 
-    // @ManyToMany(mappedBy = "lessons")
-    // private List<StudentEntity> students;
+    @Transient
+    private List<Long> studentIds;
 
     private String homeworkLink;
 
@@ -41,23 +41,37 @@ public class LessonEntity {
     
     private OffsetDateTime updateAt;
 
+    @OneToMany(mappedBy = "lesson")
+    @JsonIgnore
+    private List<LessonStudentEntity> lessonStudent;
+
+    @ManyToOne
+    @JoinColumn(name = "teacherId", nullable = false)
+    @JsonIgnore
+    private TeacherEntity teacher;
+
     @SuppressWarnings("unused")
     private LessonEntity () {}
 
-    public LessonEntity(Long id, OffsetDateTime date, OffsetDateTime dateCreated, String name, TeacherEntity teacher, String description) {
-        this.id = id;
-        this.dateCreated = dateCreated;
+    public LessonEntity(String name, OffsetDateTime date, OffsetDateTime duration, List<Long> followedUserId, TeacherEntity teacher) {
         this.name = name;
+        this.starTime = date;
+        this.endTime = duration;
+        this.studentIds = followedUserId; 
         this.teacher = teacher;
+        this.dateCreated = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         this.updateAt = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
-        this.description = description;
     }
 
-    public LessonEntity(LocalDateTime date, OffsetDateTime dateCreated, String name, TeacherEntity teacher, String description) {
-        this.dateCreated = dateCreated;
-        this.name = name;
-        this.teacher = teacher;
-        this.updateAt = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
-        this.description = description;
+    public List<Long> getStudentIds() {
+        if (studentIds == null) {
+            if (lessonStudent == null) {
+                return Collections.emptyList();
+            }
+            studentIds = lessonStudent.stream()
+                .map(ls -> ls.getStudent().getId())
+                .collect(Collectors.toList());
+        }
+        return studentIds;
     }
 }

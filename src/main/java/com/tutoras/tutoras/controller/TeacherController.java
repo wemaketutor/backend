@@ -2,21 +2,21 @@ package com.tutoras.tutoras.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tutoras.tutoras.model.TeacherRequest;
+import com.tutoras.tutoras.model.LessonsResponse;
 import com.tutoras.tutoras.model.TeacherResponse;
+import com.tutoras.tutoras.model.TeachersResponse;
 import com.tutoras.tutoras.security.UserPrincipal;
 import com.tutoras.tutoras.service.TeacherService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,25 +24,27 @@ public class TeacherController extends BaseController {
 
     private final TeacherService teacherService;
 
+    @GetMapping("/teachers")
+    public ResponseEntity<List<TeachersResponse>> getTeachers() {
+        return ResponseEntity.status(HttpStatus.OK).body(teacherService.getTeachers());
+    }
+
+    @GetMapping("/teachers/{teacher_id}")
+    public ResponseEntity<TeachersResponse> getTeacher(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("teacher_id") Long teacherId) {
+        return ResponseEntity.status(HttpStatus.OK).body(teacherService.getTeacher(teacherId));
+    }
+
     @GetMapping("/teacher/students")
     public TeacherResponse getTeachersStudents(@AuthenticationPrincipal UserPrincipal principal) {
         return teacherService.getTeachersStudents(principal.getUserId());
     }
 
-    @PostMapping("/teacher/add/student")
-    public TeacherResponse addStudent(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated TeacherRequest request) {        
-        return teacherService.addStudent(principal.getUserId(),request.getEmail());
+    @GetMapping("/teacher/{teacher_id}/lessons/")
+    public ResponseEntity<LessonsResponse> getTeacherLessons(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("teacher_id") Long teacherId) {
+        return ResponseEntity.status(HttpStatus.OK).body(teacherService.getTeacherLessons(teacherId));
     }
-
-    @GetMapping("/teacher/get/student/{student_id}")
-    public ResponseEntity<?> getStudent(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
-        return teacherService.getStudentById(principal.getUserId(), studentId);
-    }
-
-    @DeleteMapping("/teacher/delete/student/{student_id}")
-    public ResponseEntity<?> deleteStudent(@AuthenticationPrincipal UserPrincipal principal, @PathVariable("student_id") Long studentId) {
-        return teacherService.deleteStudentById(principal.getUserId(), studentId);
-    }
+    
+    
 
     // @PutMapping("path/{id}")
     // public ResponseEntity<?> updateSubjects(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated TeacherRequest request) {        
