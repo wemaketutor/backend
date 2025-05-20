@@ -81,6 +81,53 @@ public class MaterialService {
         return response;
     }
     
+    /**
+     * Получает материалы, доступные для студента
+     * @param studentId ID студента
+     * @param page номер страницы
+     * @param perPage количество элементов на странице
+     * @return ответ с материалами
+     */
+    @Transactional(readOnly = true)
+    public MaterialsResponse getMaterialsForStudent(Long studentId, int page, int perPage) {
+        UserEntity student = userRepository.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
+        
+        // Получаем публичные материалы
+        List<MaterialEntity> publicMaterials = materialRepository.findByIsPublic(true);
+        
+        // Получаем материалы, специально предоставленные этому студенту
+        List<MaterialVisibleByUserEntity> visibilities = materialVisibleByUserRepository.findByUser(student);
+        List<MaterialEntity> privateMaterials = visibilities.stream()
+                .map(MaterialVisibleByUserEntity::getMaterial)
+                .collect(Collectors.toList());
+        
+        // Объединяем публичные и персонально доступные материалы
+        List<MaterialEntity> allMaterials = new ArrayList<>(publicMaterials);
+        for (MaterialEntity material : privateMaterials) {
+            if (!allMaterials.contains(material)) {
+                allMaterials.add(material);
+            }
+        }
+        
+        int totalCount = allMaterials.size();
+        int fromIndex = (page - 1) * perPage;
+        int toIndex = Math.min(fromIndex + perPage, totalCount);
+        
+        List<MaterialEntity> pagedMaterials = 
+            (fromIndex < allMaterials.size()) ? allMaterials.subList(fromIndex, toIndex) : new ArrayList<>();
+        
+        MaterialsResponse response = new MaterialsResponse();
+        response.setMaterials(pagedMaterials.stream()
+                .map(this::mapToMaterialResponse)
+                .collect(Collectors.toList()));
+        response.setTotalCount(totalCount);
+        response.setPage(page);
+        response.setPerPage(perPage);
+        
+        return response;
+    }
+    
     public MaterialsResponse getPublicMaterials(int page, int perPage) {
         List<MaterialEntity> materials = materialRepository.findByIsPublic(true);
         

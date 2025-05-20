@@ -28,6 +28,7 @@ public class MaterialController extends BaseController {
     @GetMapping("/materials")
     public ResponseEntity<MaterialsResponse> getAllMaterials(
             @RequestParam(name = "teacherId", required = false) Long teacherId,
+            @RequestParam(name = "studentId", required = false) Long studentId,
             @RequestParam(name = "isPublic", required = false) Boolean isPublic,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "per_page", defaultValue = "10") int per_page,
@@ -36,6 +37,8 @@ public class MaterialController extends BaseController {
         
         if (teacherId != null) {
             return ResponseEntity.ok(materialService.getMaterialsByTeacher(teacherId, page, per_page));
+        } else if (studentId != null) {
+            return ResponseEntity.ok(materialService.getMaterialsForStudent(studentId, page, per_page));
         } else if (isPublic != null && isPublic) {
             return ResponseEntity.ok(materialService.getPublicMaterials(page, per_page));
         } else {
