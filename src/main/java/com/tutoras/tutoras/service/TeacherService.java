@@ -2,7 +2,6 @@ package com.tutoras.tutoras.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,6 @@ import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.exception.ConflictException;
 import com.tutoras.tutoras.exception.NotFindedSuchElementException;
 import com.tutoras.tutoras.model.LessonsResponse;
-import com.tutoras.tutoras.model.StudentInResponse;
 import com.tutoras.tutoras.model.TeacherResponse;
 import com.tutoras.tutoras.model.TeachersResponse;
 import com.tutoras.tutoras.repository.StudentRepository;
@@ -34,16 +32,8 @@ public class TeacherService {
     public TeacherResponse getTeachersStudents(Long teacherId) {
         TeacherEntity teacher = teacherRepository.findById(teacherId).orElseThrow(() -> new NotFindedSuchElementException("Teacher not found with id: " + teacherId));
         UserEntity teacherAsUser = teacher.getUser();
-        List<StudentInResponse> students = teacherAsUser.getStudents().stream()
-            .map(student -> StudentInResponse.builder()
-                .id(student.getId())
-                .firstName(student.getUser().getFirstName())
-                .lastName(student.getUser().getLastName())
-                .email(student.getUser().getEmail())
-                .build())
-            .collect(Collectors.toList());
         return TeacherResponse.builder()
-            .students(students)
+            .students(teacherAsUser.getStudents())
             .build();
     }
 

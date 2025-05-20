@@ -17,7 +17,7 @@ public class LessonResponse {
 
     private String subject;
 
-    private OffsetDateTime startTime;
+    private OffsetDateTime starTime;
 
     private OffsetDateTime endTime;
 

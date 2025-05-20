@@ -28,7 +28,7 @@ public class LessonEntity {
 
     private String subject;
 
-    private OffsetDateTime startTime;
+    private OffsetDateTime starTime;
 
     private OffsetDateTime endTime;
 
@@ -55,7 +55,7 @@ public class LessonEntity {
 
     public LessonEntity(String name, OffsetDateTime date, OffsetDateTime duration, List<Long> followedUserId, TeacherEntity teacher) {
         this.name = name;
-        this.startTime = date;
+        this.starTime = date;
         this.endTime = duration;
         this.studentIds = followedUserId; 
         this.teacher = teacher;
