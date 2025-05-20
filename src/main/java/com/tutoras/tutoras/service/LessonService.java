@@ -76,7 +76,7 @@ public class LessonService {
             .name(newLesson.getName())
             .description(newLesson.getDescription())
             .subject(newLesson.getSubject())
-            .starTime(newLesson.getStarTime())
+            .startTime(newLesson.getStartTime())
             .endTime(newLesson.getEndTime())
             .studentIds(newLesson.getStudentIds())
             .homeworkLink(newLesson.getHomeworkLink())

@@ -11,5 +11,4 @@ import lombok.Getter;
 @Builder
 public class StudentResponse {
     private List<TeacherEntity> teachers;
-
 }
