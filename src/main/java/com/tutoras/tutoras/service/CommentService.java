@@ -1,6 +1,6 @@
 package com.tutoras.tutoras.service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,13 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tutoras.tutoras.entity.CommentEntity;
-import com.tutoras.tutoras.entity.HomeworkCommentEntity;
 import com.tutoras.tutoras.entity.HomeworkEntity;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.model.CommentRequest;
 import com.tutoras.tutoras.model.CommentResponse;
+import com.tutoras.tutoras.model.CommentsResponse;
 import com.tutoras.tutoras.repository.CommentRepository;
-import com.tutoras.tutoras.repository.HomeworkCommentRepository;
 import com.tutoras.tutoras.repository.HomeworkRepository;
 import com.tutoras.tutoras.repository.UserRepository;
 
@@ -28,53 +27,50 @@ public class CommentService {
     private CommentRepository commentRepository;
     
     @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
     private HomeworkRepository homeworkRepository;
     
     @Autowired
-    private HomeworkCommentRepository homeworkCommentRepository;
+    private UserRepository userRepository;
     
-    public List<CommentResponse> getCommentsByHomework(Long homeworkId) {
-        HomeworkEntity homework = homeworkRepository.findById(homeworkId)
-                .orElseThrow(() -> new EntityNotFoundException("Homework not found with id: " + homeworkId));
+    public CommentsResponse getCommentsByHomeworkId(Long homeworkId) {
+        List<CommentEntity> comments = commentRepository.findByHomeworkId(homeworkId);
         
-        List<HomeworkCommentEntity> homeworkComments = homeworkCommentRepository.findByHomework(homework);
-        
-        return homeworkComments.stream()
-                .map(hc -> mapToCommentResponse(hc.getComment()))
+        List<CommentResponse> responseComments = comments.stream()
+                .map(this::mapToCommentResponse)
                 .collect(Collectors.toList());
+        
+        CommentsResponse response = new CommentsResponse();
+        response.setComments(responseComments);
+        response.setTotalCount(responseComments.size());
+        
+        return response;
     }
     
     @Transactional
-    public CommentResponse addCommentToHomework(CommentRequest request, Long userId) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        
+    public CommentResponse createComment(CommentRequest request) {
         HomeworkEntity homework = homeworkRepository.findById(request.getHomeworkId())
                 .orElseThrow(() -> new EntityNotFoundException("Homework not found with id: " + request.getHomeworkId()));
         
-        CommentEntity comment = new CommentEntity(request.getBody(), user);
-        CommentEntity savedComment = commentRepository.save(comment);
+        UserEntity user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
         
-        HomeworkCommentEntity homeworkComment = new HomeworkCommentEntity(homework, savedComment);
-        homeworkCommentRepository.save(homeworkComment);
+        CommentEntity comment = new CommentEntity(request.getContent(), homework, user);
+        
+        CommentEntity savedComment = commentRepository.save(comment);
         
         return mapToCommentResponse(savedComment);
     }
     
     @Transactional
-    public CommentResponse updateComment(Long commentId, CommentRequest request, Long userId) {
-        CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + commentId));
+    public CommentResponse updateComment(Long id, CommentRequest request) {
+        CommentEntity comment = commentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + id));
         
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User is not the author of the comment");
+        if (request.getContent() != null) {
+            comment.setContent(request.getContent());
         }
         
-        comment.setBody(request.getBody());
-        comment.setUpdatedAt(LocalDateTime.now());
+        comment.setUpdatedAt(OffsetDateTime.now());
         
         CommentEntity updatedComment = commentRepository.save(comment);
         
@@ -82,25 +78,29 @@ public class CommentService {
     }
     
     @Transactional
-    public void deleteComment(Long commentId, Long userId) {
-        CommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + commentId));
-        
-        if (!comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User is not the author of the comment");
+    public void deleteComment(Long id) {
+        if (!commentRepository.existsById(id)) {
+            throw new EntityNotFoundException("Comment not found with id: " + id);
         }
         
-        List<HomeworkCommentEntity> homeworkComments = homeworkCommentRepository.findByComment(comment);
-        homeworkCommentRepository.deleteAll(homeworkComments);
-        commentRepository.delete(comment);
+        commentRepository.deleteById(id);
     }
     
     private CommentResponse mapToCommentResponse(CommentEntity comment) {
         CommentResponse response = new CommentResponse();
         response.setId(comment.getId());
-        response.setBody(comment.getBody());
-        response.setUserId(comment.getUser().getId());
-        response.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
+        response.setContent(comment.getContent());
+        
+        if (comment.getHomework() != null) {
+            response.setHomeworkId(comment.getHomework().getId());
+        }
+        
+        if (comment.getUser() != null) {
+            response.setUserId(comment.getUser().getId());
+            response.setUserFullName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
+            response.setUserRole(comment.getUser().getRole() != null ? comment.getUser().getRole().name() : null);
+        }
+        
         response.setCreatedAt(comment.getCreatedAt());
         response.setUpdatedAt(comment.getUpdatedAt());
         

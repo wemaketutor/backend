@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class CommentRequest {
-    private String body;
+    private String content;
     private Long homeworkId;
+    private Long userId;
 } 

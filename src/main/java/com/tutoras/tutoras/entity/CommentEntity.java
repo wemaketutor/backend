@@ -1,6 +1,6 @@
 package com.tutoras.tutoras.entity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -16,24 +16,29 @@ public class CommentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String body;
+    @Column(nullable = false)
+    private String content;
+    
+    @ManyToOne
+    @JoinColumn(name = "homework_id")
+    private HomeworkEntity homework;
     
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
     
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     
     @SuppressWarnings("unused")
     private CommentEntity() {}
     
-    public CommentEntity(String body, UserEntity user) {
-        this.body = body;
+    public CommentEntity(String content, HomeworkEntity homework, UserEntity user) {
+        this.content = content;
+        this.homework = homework;
         this.user = user;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 } 

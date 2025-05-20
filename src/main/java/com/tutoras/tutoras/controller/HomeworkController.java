@@ -9,6 +9,7 @@ import com.tutoras.tutoras.model.*;
 import com.tutoras.tutoras.service.HomeworkService;
 
 @RestController
+@RequestMapping("/api")
 public class HomeworkController {
     
     @Autowired
@@ -16,21 +17,36 @@ public class HomeworkController {
     
     @GetMapping("/homeworks")
     public ResponseEntity<HomeworksResponse> getAllHomeworks(
-            @RequestParam(required = true) Long studentId,
-            @RequestParam(required = false) Long teacherId,
-            @RequestParam(defaultValue = "dueDate") String sort_by,
-            @RequestParam(defaultValue = "desc") String sort_order,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int per_page) {
+            @RequestParam(name = "studentId", required = false) Long studentId,
+            @RequestParam(name = "teacherId", required = false) Long teacherId,
+            @RequestParam(name = "sort_by", defaultValue = "dueDate") String sort_by,
+            @RequestParam(name = "sort_order", defaultValue = "desc") String sort_order,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "per_page", defaultValue = "10") int per_page) {
         
-        // if (teacherId != null) {
-            //возвращаем дз studentId от teacherId
-            return ResponseEntity.status(HttpStatus.CREATED).body(homeworkService.getHomeworksForStudentFromTeacher(studentId, teacherId, page, per_page, sort_by, sort_order));
-        // } else {
-            // возвращаем все дз studentId
-            // return homeworkService.getHomeworksByStudent(studentId, page, per_page);
-        // }
+        // Если указан studentId, используем фильтрацию по студенту
+        if (studentId != null) {
+            // Если также указан teacherId, фильтруем по обоим
+            if (teacherId != null) {
+                return ResponseEntity.ok(homeworkService.getHomeworksForStudentFromTeacher(studentId, teacherId, page, per_page, sort_by, sort_order));
+            } else {
+                // Если только studentId, фильтруем только по студенту
+                return ResponseEntity.ok(homeworkService.getHomeworksForStudent(studentId, page, per_page, sort_by, sort_order));
+            }
+        } 
+        // Если указан только teacherId, фильтруем по учителю
+        else if (teacherId != null) {
+            return ResponseEntity.ok(homeworkService.getHomeworksForTeacher(teacherId, page, per_page, sort_by, sort_order));
+        }
+        // Если указан статус, фильтруем по нему
+        else if (status != null) {
+            return ResponseEntity.ok(homeworkService.getHomeworksByStatus(status, page, per_page));
+        }
+        // Иначе возвращаем все доступные домашние задания
+        else {
+            return ResponseEntity.ok(homeworkService.getAllHomeworks(page, per_page, sort_by, sort_order));
+        }
     }
     
     @GetMapping("/homeworks/{homework_id}")
@@ -60,7 +76,7 @@ public class HomeworkController {
     @PatchMapping("/homeworks/{homework_id}/status")
     public ResponseEntity<?> updateHomeworkStatus(
             @PathVariable("homework_id") Long homeworkId,
-            @RequestBody String status) {
-        return ResponseEntity.ok(homeworkService.updateHomeworkStatus(homeworkId, status));
+            @RequestBody StatusRequest status) {
+        return ResponseEntity.ok(homeworkService.updateHomeworkStatus(homeworkId, status.getStatus()));
     }
 } 

@@ -6,5 +6,5 @@ import lombok.Data;
 
 @Data 
 public class HomeworkListResponse {
-    private List<HomeworkResponse> students;
+    private List<HomeworkResponse> homeworks;
 }

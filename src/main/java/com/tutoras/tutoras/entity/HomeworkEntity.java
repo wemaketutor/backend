@@ -47,6 +47,12 @@ public class HomeworkEntity {
     @JoinColumn(name = "lesson_id")
     private EventEntity lesson;
     
+    @Transient
+    private LessonEntity lessonEntity;
+    
+    @Column(name = "lesson_entity_id")
+    private Long lessonEntityId;
+    
     private OffsetDateTime createdAt;
     
     private OffsetDateTime updatedAt;
@@ -64,6 +70,21 @@ public class HomeworkEntity {
         this.assessmentScale = assessmentScale;
         this.student = student;
         this.lesson = lesson;
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
+    }
+    
+    public HomeworkEntity(String title, String description, OffsetDateTime dueDate, 
+                         HomeworkStatus status, Integer assessmentScale, 
+                         StudentEntity student, LessonEntity lessonEntity) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.status = status;
+        this.assessmentScale = assessmentScale;
+        this.student = student;
+        this.lessonEntity = lessonEntity;
+        this.lessonEntityId = lessonEntity != null ? lessonEntity.getId() : null;
         this.createdAt = OffsetDateTime.now();
         this.updatedAt = OffsetDateTime.now();
     }

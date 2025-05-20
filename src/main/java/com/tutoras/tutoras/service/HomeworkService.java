@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tutoras.tutoras.entity.EventEntity;
 import com.tutoras.tutoras.entity.HomeworkEntity;
+import com.tutoras.tutoras.entity.LessonEntity;
 import com.tutoras.tutoras.entity.StudentEntity;
 import com.tutoras.tutoras.entity.HomeworkEntity.HomeworkStatus;
 import com.tutoras.tutoras.model.HomeworkRequest;
@@ -17,6 +18,7 @@ import com.tutoras.tutoras.model.HomeworkResponse;
 import com.tutoras.tutoras.model.HomeworksResponse;
 import com.tutoras.tutoras.repository.EventRepository;
 import com.tutoras.tutoras.repository.HomeworkRepository;
+import com.tutoras.tutoras.repository.LessonRepository;
 import com.tutoras.tutoras.repository.StudentRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -33,30 +35,53 @@ public class HomeworkService {
     @Autowired
     private EventRepository eventRepository;
     
+    @Autowired
+    private LessonRepository lessonRepository;
+    
     public HomeworksResponse getHomeworksForStudentFromTeacher(Long studentId, Long teacherId, int page, int perPage, String sort_by, String sort_order) {
-        if (!studentRepository.findById(teacherId).isPresent()){
-            
-        }
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
         
         List<HomeworkEntity> homeworks = homeworkRepository.findByStudent(student);
         
+        if (teacherId != null) {
+            homeworks = homeworks.stream()
+                    .filter(hw -> hw.getLesson() != null && 
+                           hw.getLesson().getUser() != null && 
+                           hw.getLesson().getUser().getId().equals(teacherId))
+                    .collect(Collectors.toList());
+        }
+        
+        if (sort_by != null && sort_order != null) {
+            boolean ascending = "asc".equalsIgnoreCase(sort_order);
+            homeworks = sortHomeworks(homeworks, sort_by, ascending);
+        }
+        
         int totalCount = homeworks.size();
         int fromIndex = (page - 1) * perPage;
         int toIndex = Math.min(fromIndex + perPage, totalCount);
         
-        List<HomeworkEntity> pagedHomeworks = homeworks.subList(fromIndex, toIndex);
-        
-        HomeworksResponse response = new HomeworksResponse();
-        response.setHomeworks(pagedHomeworks.stream()
-                .map(this::mapToHomeworkResponse)
-                .collect(Collectors.toList()));
-        response.setTotalCount(totalCount);
-        response.setPage(page);
-        response.setPerPage(perPage);
-        
-        return response;
+        if (fromIndex < totalCount) {
+            List<HomeworkEntity> pagedHomeworks = homeworks.subList(fromIndex, toIndex);
+            
+            HomeworksResponse response = new HomeworksResponse();
+            response.setHomeworks(pagedHomeworks.stream()
+                    .map(this::mapToHomeworkResponse)
+                    .collect(Collectors.toList()));
+            response.setTotalCount(totalCount);
+            response.setPage(page);
+            response.setPerPage(perPage);
+            
+            return response;
+        } else {
+            HomeworksResponse response = new HomeworksResponse();
+            response.setHomeworks(List.of());
+            response.setTotalCount(totalCount);
+            response.setPage(page);
+            response.setPerPage(perPage);
+            
+            return response;
+        }
     }
     
     public HomeworksResponse getHomeworksByStatus(String status, int page, int perPage) {
@@ -93,20 +118,46 @@ public class HomeworkService {
         StudentEntity student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + request.getStudentId()));
         
-        EventEntity lesson = eventRepository.findById(request.getLessonId())
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + request.getLessonId()));
+        LessonEntity lesson = null;
+        EventEntity event = null;
+        HomeworkEntity homework = null;
+        
+        try {
+            lesson = lessonRepository.findById(request.getLessonId())
+                    .orElse(null);
+        } catch (Exception e) {
+        }
         
         HomeworkStatus status = HomeworkStatus.valueOf(request.getStatus().toUpperCase());
         
-        HomeworkEntity homework = new HomeworkEntity(
-                request.getTitle(),
-                request.getDescription(),
-                request.getDueDate(),
-                status,
-                request.getAssessmentScale(),
-                student,
-                lesson
-        );
+        if (lesson != null) {
+            homework = new HomeworkEntity(
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getDueDate(),
+                    status,
+                    request.getAssessmentScale(),
+                    student,
+                    lesson
+            );
+        } else {
+            try {
+                event = eventRepository.findById(request.getLessonId())
+                        .orElseThrow(() -> new EntityNotFoundException("Lesson/Event not found with id: " + request.getLessonId()));
+                
+                homework = new HomeworkEntity(
+                        request.getTitle(),
+                        request.getDescription(),
+                        request.getDueDate(),
+                        status,
+                        request.getAssessmentScale(),
+                        student,
+                        event
+                );
+            } catch (Exception e) {
+                throw new EntityNotFoundException("Lesson/Event not found with id: " + request.getLessonId());
+            }
+        }
         
         if (request.getGrade() != null) {
             homework.setGrade(request.getGrade());
@@ -154,9 +205,28 @@ public class HomeworkService {
         }
         
         if (request.getLessonId() != null) {
-            EventEntity lesson = eventRepository.findById(request.getLessonId())
-                    .orElseThrow(() -> new EntityNotFoundException("Lesson not found with id: " + request.getLessonId()));
-            homework.setLesson(lesson);
+            LessonEntity lesson = null;
+            try {
+                lesson = lessonRepository.findById(request.getLessonId())
+                        .orElse(null);
+            } catch (Exception e) {
+            }
+            
+            if (lesson != null) {
+                homework.setLessonEntity(lesson);
+                homework.setLessonEntityId(lesson.getId());
+                homework.setLesson(null);
+            } else {
+                try {
+                    EventEntity event = eventRepository.findById(request.getLessonId())
+                            .orElseThrow(() -> new EntityNotFoundException("Lesson/Event not found with id: " + request.getLessonId()));
+                    homework.setLesson(event);
+                    homework.setLessonEntity(null);
+                    homework.setLessonEntityId(null);
+                } catch (Exception e) {
+                    throw new EntityNotFoundException("Lesson/Event not found with id: " + request.getLessonId());
+                }
+            }
         }
         
         homework.setUpdatedAt(OffsetDateTime.now());
@@ -205,13 +275,156 @@ public class HomeworkService {
                                    homework.getStudent().getUser().getLastName());
         }
         
-        if (homework.getLesson() != null) {
+        if (homework.getLessonEntity() != null) {
+            response.setLessonId(homework.getLessonEntity().getId());
+            response.setLessonName(homework.getLessonEntity().getName());
+        } 
+        else if (homework.getLesson() != null) {
             response.setLessonId(homework.getLesson().getId());
             response.setLessonName(homework.getLesson().getName());
+        }
+
+        else if (homework.getLessonEntityId() != null) {
+            response.setLessonId(homework.getLessonEntityId());
+            try {
+                LessonEntity lessonEntity = lessonRepository.findById(homework.getLessonEntityId()).orElse(null);
+                if (lessonEntity != null) {
+                    response.setLessonName(lessonEntity.getName());
+                } else {
+                    response.setLessonName("Unknown Lesson");
+                }
+            } catch (Exception e) {
+                response.setLessonName("Unknown Lesson");
+            }
         }
         
         response.setCreatedAt(homework.getCreatedAt());
         response.setUpdatedAt(homework.getUpdatedAt());
+        
+        return response;
+    }
+    
+    private List<HomeworkEntity> sortHomeworks(List<HomeworkEntity> homeworks, String sortBy, boolean ascending) {
+        switch (sortBy.toLowerCase()) {
+            case "duedate":
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getDueDate().compareTo(h2.getDueDate())
+                        : h2.getDueDate().compareTo(h1.getDueDate()));
+                break;
+            case "title":
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getTitle().compareTo(h2.getTitle())
+                        : h2.getTitle().compareTo(h1.getTitle()));
+                break;
+            case "status":
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getStatus().name().compareTo(h2.getStatus().name())
+                        : h2.getStatus().name().compareTo(h1.getStatus().name()));
+                break;
+            case "createdat":
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getCreatedAt().compareTo(h2.getCreatedAt())
+                        : h2.getCreatedAt().compareTo(h1.getCreatedAt()));
+                break;
+            case "updatedat":
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getUpdatedAt().compareTo(h2.getUpdatedAt())
+                        : h2.getUpdatedAt().compareTo(h1.getUpdatedAt()));
+                break;
+            default:
+                homeworks.sort((h1, h2) -> ascending 
+                        ? h1.getCreatedAt().compareTo(h2.getCreatedAt())
+                        : h2.getCreatedAt().compareTo(h1.getCreatedAt()));
+        }
+        return homeworks;
+    }
+    
+    /**
+     * Получить все домашние задания с пагинацией и сортировкой
+     */
+    public HomeworksResponse getAllHomeworks(int page, int perPage, String sortBy, String sortOrder) {
+        List<HomeworkEntity> homeworks = homeworkRepository.findAll();
+        
+        // Сортировка
+        if (sortBy != null && sortOrder != null) {
+            boolean ascending = "asc".equalsIgnoreCase(sortOrder);
+            homeworks = sortHomeworks(homeworks, sortBy, ascending);
+        }
+        
+        return createPaginatedResponse(homeworks, page, perPage);
+    }
+    
+    /**
+     * Получить домашние задания конкретного студента с пагинацией и сортировкой
+     */
+    public HomeworksResponse getHomeworksForStudent(Long studentId, int page, int perPage, String sortBy, String sortOrder) {
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
+        
+        List<HomeworkEntity> homeworks = homeworkRepository.findByStudent(student);
+        
+        // Сортировка
+        if (sortBy != null && sortOrder != null) {
+            boolean ascending = "asc".equalsIgnoreCase(sortOrder);
+            homeworks = sortHomeworks(homeworks, sortBy, ascending);
+        }
+        
+        return createPaginatedResponse(homeworks, page, perPage);
+    }
+    
+    /**
+     * Получить домашние задания, созданные конкретным учителем, с пагинацией и сортировкой
+     */
+    public HomeworksResponse getHomeworksForTeacher(Long teacherId, int page, int perPage, String sortBy, String sortOrder) {
+        // Получаем все домашние задания
+        List<HomeworkEntity> allHomeworks = homeworkRepository.findAll();
+        
+        // Фильтруем по учителю
+        List<HomeworkEntity> teacherHomeworks = allHomeworks.stream()
+                .filter(hw -> {
+                    // Проверяем сначала через EventEntity
+                    if (hw.getLesson() != null && hw.getLesson().getUser() != null) {
+                        return hw.getLesson().getUser().getId().equals(teacherId);
+                    }
+                    // Затем через LessonEntity, если есть
+                    else if (hw.getLessonEntity() != null && hw.getLessonEntity().getTeacher() != null) {
+                        return hw.getLessonEntity().getTeacher().getId().equals(teacherId);
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+        
+        // Сортировка
+        if (sortBy != null && sortOrder != null) {
+            boolean ascending = "asc".equalsIgnoreCase(sortOrder);
+            teacherHomeworks = sortHomeworks(teacherHomeworks, sortBy, ascending);
+        }
+        
+        return createPaginatedResponse(teacherHomeworks, page, perPage);
+    }
+    
+    /**
+     * Вспомогательный метод для создания пагинированного ответа
+     */
+    private HomeworksResponse createPaginatedResponse(List<HomeworkEntity> homeworks, int page, int perPage) {
+        int totalCount = homeworks.size();
+        int fromIndex = (page - 1) * perPage;
+        int toIndex = Math.min(fromIndex + perPage, totalCount);
+        
+        HomeworksResponse response = new HomeworksResponse();
+        
+        if (fromIndex < totalCount) {
+            List<HomeworkEntity> pagedHomeworks = homeworks.subList(fromIndex, toIndex);
+            response.setHomeworks(pagedHomeworks.stream()
+                    .map(this::mapToHomeworkResponse)
+                    .collect(Collectors.toList()));
+        } else {
+            response.setHomeworks(List.of());
+        }
+        
+        response.setTotalCount(totalCount);
+        response.setPage(page);
+        response.setPerPage(perPage);
         
         return response;
     }

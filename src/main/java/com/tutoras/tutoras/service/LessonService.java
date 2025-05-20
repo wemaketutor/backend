@@ -85,7 +85,6 @@ public class LessonService {
         LessonEntity newLesson = new LessonEntity(lessonName, date, duration, List.of(followedUserId), userAsTeacher);
         lessonRepository.save(newLesson);
         
-        // Создание связи с учеником
         StudentEntity student = studentRepository.findById(followedUser.getStudentId())
             .orElseThrow(() -> new NotFindedSuchElementException("Student not found with id: " + followedUser.getStudentId()));
         LessonStudentEntity lessonStudent = new LessonStudentEntity(newLesson, student);
@@ -142,10 +141,7 @@ public class LessonService {
             throw new ConflictException("You can only delete your own lessons");
         }
         
-        // Удаляем связи со студентами
         lessonStudentRepository.deleteByLessonId(lessonId);
-        
-        // Удаляем сам урок
         lessonRepository.delete(lesson);
     }
     
@@ -169,13 +165,11 @@ public class LessonService {
         StudentEntity student = studentRepository.findById(studentId)
             .orElseThrow(() -> new NotFindedSuchElementException("Student not found with id: " + studentId));
         
-        // Проверяем, не записан ли студент уже на этот урок
         boolean alreadyTaken = lessonStudentRepository.existsByLessonIdAndStudentId(lessonId, studentId);
         if (alreadyTaken) {
             throw new ConflictException("Student is already taking this lesson");
         }
         
-        // Создаем запись о том, что студент берет урок
         LessonStudentEntity lessonStudent = new LessonStudentEntity(lesson, student);
         lessonStudentRepository.save(lessonStudent);
         
@@ -193,17 +187,13 @@ public class LessonService {
         StudentEntity otherStudent = studentRepository.findById(otherStudentId)
             .orElseThrow(() -> new NotFindedSuchElementException("Other student not found with id: " + otherStudentId));
         
-        // Проверяем, что студент записан на урок
         boolean studentTakesLesson = lessonStudentRepository.existsByLessonIdAndStudentId(lessonId, studentId);
         if (!studentTakesLesson) {
             throw new ConflictException("Student is not taking this lesson");
         }
         
-        // Устанавливаем флаг запроса на смену в связи студент-урок
-        // Примечание: тут должна быть реализация логики для запросов на смену уроков
-        // Для полной реализации, необходимо расширить модель данных
-        
-        // В данной реализации просто возвращаем текущий урок
+        // TODO: тут должна быть реализация логики для запросов на смену уроков
+
         return buildLessonResponse(lesson);
     }
     
@@ -215,16 +205,13 @@ public class LessonService {
         StudentEntity student = studentRepository.findById(studentId)
             .orElseThrow(() -> new NotFindedSuchElementException("Student not found with id: " + studentId));
         
-        // Проверяем, что студент записан на урок
         boolean studentTakesLesson = lessonStudentRepository.existsByLessonIdAndStudentId(lessonId, studentId);
         if (!studentTakesLesson) {
             throw new ConflictException("Student is not taking this lesson");
         }
         
-        // Тут должна быть реализация логики для подтверждения смены уроков
-        // Для полной реализации, необходимо расширить модель данных
+        //TODO: тут должна быть реализация логики для подтверждения смены уроков
         
-        // В данной реализации просто возвращаем текущий урок
         return buildLessonResponse(lesson);
     }
     
