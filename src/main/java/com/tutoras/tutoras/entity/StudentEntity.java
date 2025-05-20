@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -30,8 +31,26 @@ public class StudentEntity {
     @OneToMany(mappedBy = "student")
     private List<LessonStudentEntity> lessonStudent;
 
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private UserEntity teacher;
+    
+
     @SuppressWarnings("unused")
     private StudentEntity () {}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        StudentEntity student = (StudentEntity) obj;
+        return id != null && id.equals(student.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
     public StudentEntity (UserEntity user) {
         this.user = user;

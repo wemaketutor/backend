@@ -60,6 +60,9 @@ public class LessonService {
     }
 
     public LessonResponse createLesson(Long userId, String lessonName, OffsetDateTime date, OffsetDateTime duration, Long followedUserId) {
+        if (userId == null || followedUserId == null) {
+            throw new IllegalArgumentException("ID не может быть null");
+        }
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
         UserEntity followedUser = userRepository.findById(followedUserId).orElseThrow(() -> new NotFindedSuchElementException("followedUser not found with id: " + followedUserId));
         if (!Role.TEACHER.equals(user.getRole()) || !Role.STUDENT.equals(followedUser.getRole())) {

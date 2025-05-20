@@ -40,6 +40,7 @@ dependencies {
 	testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 	testImplementation("org.mockito:mockito-core")
 	testImplementation("org.mockito:mockito-junit-jupiter")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("com.h2database:h2")
 }
 

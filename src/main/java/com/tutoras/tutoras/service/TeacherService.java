@@ -80,11 +80,8 @@ public class TeacherService {
             throw new ConflictException("Target user is not a teacher");
         }
 
-        StudentEntity userAsStudent = studentRepository.findById(user.getStudentId()).orElseThrow();
-        List<StudentEntity> existedStudents = teacher.getStudents();
-        if (!existedStudents.contains(userAsStudent)) {
-            existedStudents.add(userAsStudent);
-            userRepository.save(teacher);
-        }
+        StudentEntity userAsStudent = studentRepository.findById(user.getStudentId()).orElseThrow(() -> new NotFindedSuchElementException("Student not found"));
+        userAsStudent.setTeacher(teacher);
+        studentRepository.save(userAsStudent);
     }
 }

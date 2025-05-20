@@ -27,7 +27,7 @@ public class LessonController extends BaseController {
 
     private final LessonService lessonService;
     
-    @GetMapping("/lessons/")
+    @GetMapping("/lessons")
     public ResponseEntity<LessonsResponse> getLessons(
         @AuthenticationPrincipal UserPrincipal principal,
         @RequestParam(name = "page", defaultValue = "1") Integer page,

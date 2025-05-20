@@ -23,6 +23,9 @@ public class ProfileService {
     private final StudentRepository studentRepository;
 
     public ProfileRequest updateProfile(Long userId, String username, String firstName, String lastName, String email, String password, String phone, Role role) {
+        if (userId == null) {
+            throw new IllegalArgumentException("ID не может быть null");
+        }
         UserEntity existingUser = userRepository.findById(userId).orElseThrow(() -> new NotFindedSuchElementException("User not found with id: " + userId));
         if (!existingUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
             throw new ConflictException("Already exist user with email:" + email);
@@ -42,9 +45,9 @@ public class ProfileService {
             existingUser.setTeacherId(teacher.getId());
         }
         if (existingUser.getStudentId() == null) {
-            StudentEntity teacher = new StudentEntity(existingUser);
-            studentRepository.save(teacher);
-            existingUser.setTeacherId(teacher.getId());
+            StudentEntity student = new StudentEntity(existingUser);
+            studentRepository.save(student);
+            existingUser.setStudentId(student.getId());
         }
         userRepository.save(existingUser);
         return ProfileRequest.builder()

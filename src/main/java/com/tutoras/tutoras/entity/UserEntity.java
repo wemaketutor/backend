@@ -1,5 +1,6 @@
 package com.tutoras.tutoras.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -53,9 +54,9 @@ public class UserEntity {
     @JsonIgnore
     private List<EventEntity> eventsAsFollower;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "teacher")
     @JsonIgnore
-    private List<StudentEntity> students;
+    private List<StudentEntity> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
