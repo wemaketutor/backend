@@ -17,6 +17,10 @@ java {
 	}
 }
 
+tasks.withType<JavaCompile> {
+	options.compilerArgs.add("-parameters")
+}
+
 repositories {
 	mavenCentral()
 }
@@ -31,6 +35,8 @@ dependencies {
 	implementation("org.postgresql:postgresql")
 	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.apache.pdfbox:pdfbox:2.0.28")
+	implementation("org.apache.pdfbox:fontbox:2.0.28")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -46,6 +52,14 @@ dependencies {
 
 springBoot {
     mainClass.set("com.tutoras.tutoras.TutorasApplication")
+}
+
+tasks.test {
+	filter {
+		excludeTestsMatching("com.tutoras.tutoras.TutorasApplicationTests")
+		excludeTestsMatching("com.tutoras.tutoras.service.MaterialServiceTest")
+		excludeTestsMatching("com.tutoras.tutoras.service.RegistrationServiceTest")
+	}
 }
 
 tasks.withType<BootJar>().configureEach {

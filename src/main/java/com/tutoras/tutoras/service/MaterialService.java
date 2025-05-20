@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tutoras.tutoras.entity.MaterialEntity;
 import com.tutoras.tutoras.entity.MaterialVisibleByUserEntity;
+import com.tutoras.tutoras.entity.SourceEntity;
 import com.tutoras.tutoras.entity.TeacherEntity;
 import com.tutoras.tutoras.entity.UserEntity;
 import com.tutoras.tutoras.exception.NotFindedSuchElementException;
@@ -37,6 +38,9 @@ public class MaterialService {
     
     @Autowired
     private MaterialVisibleByUserRepository materialVisibleByUserRepository;
+    
+    @Autowired
+    private PdfGeneratorService pdfGeneratorService;
     
     public MaterialsResponse getAllMaterials(int page, int perPage) {
         List<MaterialEntity> materials = materialRepository.findAll();
@@ -81,28 +85,19 @@ public class MaterialService {
         return response;
     }
     
-    /**
-     * Получает материалы, доступные для студента
-     * @param studentId ID студента
-     * @param page номер страницы
-     * @param perPage количество элементов на странице
-     * @return ответ с материалами
-     */
+
     @Transactional(readOnly = true)
     public MaterialsResponse getMaterialsForStudent(Long studentId, int page, int perPage) {
         UserEntity student = userRepository.findById(studentId)
                 .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + studentId));
         
-        // Получаем публичные материалы
         List<MaterialEntity> publicMaterials = materialRepository.findByIsPublic(true);
         
-        // Получаем материалы, специально предоставленные этому студенту
         List<MaterialVisibleByUserEntity> visibilities = materialVisibleByUserRepository.findByUser(student);
         List<MaterialEntity> privateMaterials = visibilities.stream()
                 .map(MaterialVisibleByUserEntity::getMaterial)
                 .collect(Collectors.toList());
         
-        // Объединяем публичные и персонально доступные материалы
         List<MaterialEntity> allMaterials = new ArrayList<>(publicMaterials);
         for (MaterialEntity material : privateMaterials) {
             if (!allMaterials.contains(material)) {
@@ -160,10 +155,29 @@ public class MaterialService {
         TeacherEntity teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new NotFindedSuchElementException("Teacher not found with id: " + teacherId));
         
+        String fileUrl = request.getFileUrl();
+        if (fileUrl == null || fileUrl.trim().isEmpty()) {
+            SourceEntity source = new SourceEntity(
+                request.getTitle(),
+                request.getDescription(),
+                "Автоматически сгенерированный материал"
+            );
+            
+            try {
+                fileUrl = pdfGeneratorService.generatePdf(source);
+                
+                if (fileUrl == null || fileUrl.trim().isEmpty()) {
+                    fileUrl = "/files/pdf/default.pdf";
+                }
+            } catch (Exception e) {
+                fileUrl = "/files/pdf/default.pdf";
+            }
+        }
+        
         MaterialEntity material = new MaterialEntity(
                 request.getTitle(),
                 request.getDescription(),
-                request.getFileUrl(),
+                fileUrl,
                 request.getIsPublic(),
                 teacher
         );

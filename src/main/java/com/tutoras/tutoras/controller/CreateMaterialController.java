@@ -26,7 +26,6 @@ public class CreateMaterialController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CreateMaterialRequest request
     ) {
-        // Проверка аутентификации
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not authenticated");

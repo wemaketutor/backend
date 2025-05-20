@@ -6,6 +6,8 @@ logging:
     root: "warn"
     org.springframework.web: "DEBUG"
     org.hibernate: "error"
+    com.tutoras.tutoras.service: "DEBUG"
+    com.tutoras.tutoras.controller: "DEBUG"
 security:
     jwt:
         secret-key: thisprojecthasbeenindevelopmentforalongtimesecret
@@ -24,6 +26,7 @@ spring:
     resources:
       static-locations:
         - file:./uploads/
+      static-path-pattern: /files/**
 management:
   endpoints:
     web:

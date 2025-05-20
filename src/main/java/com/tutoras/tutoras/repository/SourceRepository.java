@@ -9,6 +9,6 @@ import java.util.List;
 
 
 public interface SourceRepository extends JpaRepository<SourceEntity, Long> {
-    @Query("SELECT m FROM Sources m WHERE m.id IN :ids")
+    @Query("SELECT s FROM SourceEntity s WHERE s.id IN :ids")
     List<SourceEntity> getAllByIds(@Param("ids") List<Long> ids);
 }

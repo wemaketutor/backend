@@ -1,7 +1,12 @@
 package com.tutoras.tutoras.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,9 +19,18 @@ import com.tutoras.tutoras.service.MaterialService;
 import com.tutoras.tutoras.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class MaterialController extends BaseController {
     
     @Autowired
@@ -24,6 +38,9 @@ public class MaterialController extends BaseController {
     
     @Autowired
     private UserService userService;
+    
+    @Value("${spring.web.resources.static-locations[0]}")
+    private String uploadDir;
     
     @GetMapping("/materials")
     public ResponseEntity<MaterialsResponse> getAllMaterials(
@@ -87,5 +104,96 @@ public class MaterialController extends BaseController {
         
         materialService.deleteMaterial(materialId);
         return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping(value = "/download/{relativePath}/{fileName:.+}", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<Resource> downloadFile(
+            @PathVariable String relativePath,
+            @PathVariable String fileName,
+            HttpServletResponse response) {
+        
+        String basePath = uploadDir.replace("file:", "");
+        Path filePath = Paths.get(basePath, relativePath, fileName);
+        
+        if (!Files.exists(filePath)) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Resource resource = new FileSystemResource(filePath.toFile());
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .body(resource);
+    }
+    
+    @GetMapping(value = "/materials/{id}/download")
+    public ResponseEntity<Resource> downloadMaterialFile(@PathVariable("id") Long id) {
+        log.info("Запрос на скачивание файла для материала с ID: {}", id);
+        
+        MaterialResponse material = materialService.getMaterialById(id);
+        
+        if (material == null) {
+            log.warn("Материал с ID {} не найден", id);
+            return ResponseEntity.notFound().build();
+        }
+        
+        if (material.getFileUrl() == null || material.getFileUrl().trim().isEmpty()) {
+            log.warn("У материала {} отсутствует URL файла", id);
+            return ResponseEntity.notFound().build();
+        }
+        
+        String fileUrl = material.getFileUrl();
+        log.info("URL файла материала {}: {}", id, fileUrl);
+        
+        String basePath = uploadDir.replace("file:", "");
+        Path filePath = Paths.get(basePath, fileUrl);
+        log.info("Полный путь к файлу: {}", filePath.toAbsolutePath());
+        
+        if (!Files.exists(filePath)) {
+            log.warn("Файл не найден по пути: {}", filePath.toAbsolutePath());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        
+        String contentType = determineContentType(filePath.toString());
+        log.info("Определен тип контента: {}", contentType);
+        
+        Resource resource = new FileSystemResource(filePath.toFile());
+        
+        try {
+            log.info("Файл найден, размер: {} байт", Files.size(filePath));
+        } catch (IOException e) {
+            log.error("Ошибка при получении размера файла: {}", e.getMessage());
+        }
+        
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, 
+                    "attachment; filename=\"" + material.getTitle().replaceAll("[^a-zA-Z0-9.-]", "_") + getFileExtension(fileUrl) + "\"")
+                .body(resource);
+    }
+    
+
+    private String determineContentType(String filePath) {
+        if (filePath.endsWith(".pdf")) {
+            return MediaType.APPLICATION_PDF_VALUE;
+        } else if (filePath.endsWith(".txt")) {
+            return MediaType.TEXT_PLAIN_VALUE;
+        } else if (filePath.endsWith(".html") || filePath.endsWith(".htm")) {
+            return MediaType.TEXT_HTML_VALUE;
+        } else if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG_VALUE;
+        } else if (filePath.endsWith(".png")) {
+            return MediaType.IMAGE_PNG_VALUE;
+        } else {
+            return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+    }
+    
+    private String getFileExtension(String fileUrl) {
+        int lastDotIndex = fileUrl.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            return fileUrl.substring(lastDotIndex);
+        }
+        return ".pdf";
     }
 } 

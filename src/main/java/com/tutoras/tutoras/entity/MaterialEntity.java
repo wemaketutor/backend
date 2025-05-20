@@ -40,4 +40,11 @@ public class MaterialEntity {
         this.isPublic = isPublic;
         this.teacher = teacher;
     }
+    
+    public MaterialEntity(SourceEntity source, Long teacherId, String fileUrl) {
+        this.title = source.getTitle();
+        this.description = source.getDescription();
+        this.fileUrl = fileUrl;
+        this.isPublic = true;
+    }
 } 
