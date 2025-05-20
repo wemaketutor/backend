@@ -1,0 +1,42 @@
+package com.tutoras.tutoras.service;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import com.tutoras.tutoras.entity.MaterialEntity;
+import com.tutoras.tutoras.entity.SourceEntity;
+import com.tutoras.tutoras.model.CreateMaterialRequest;
+import com.tutoras.tutoras.repository.MaterialRepository;
+import com.tutoras.tutoras.repository.SourceRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
+public class CreateMaterialService {
+    private final SourceRepository sourceRepository;
+    private final MaterialRepository materialRepository;
+
+    private final PdfGeneratorService pdfGeneratorService;
+
+    public Long createMaterial(Long teacherId, CreateMaterialRequest request) {
+
+        List<SourceEntity> sources = sourceRepository.getAllByIds(request.getSources_id());
+        if (sources.isEmpty()) {
+            throw new IllegalArgumentException("No materials found with provided IDs");
+        }
+
+        SourceEntity combinedSource = pdfGeneratorService.generateCombinedSource(sources);
+        String materialUrl = pdfGeneratorService.generatePdf(combinedSource);
+
+        MaterialEntity combinedMaterial = new MaterialEntity(combinedSource, teacherId, materialUrl);
+
+        return materialRepository.save(combinedMaterial).getId();
+    }
+}
