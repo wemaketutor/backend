@@ -30,4 +30,9 @@ public class LessonStudentEntity {
 
     @SuppressWarnings("unused")
     private LessonStudentEntity () {}
+    
+    public LessonStudentEntity(LessonEntity lesson, StudentEntity student) {
+        this.lesson = lesson;
+        this.student = student;
+    }
 }

@@ -16,7 +16,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -38,10 +41,71 @@ public class LessonController extends BaseController {
             return ResponseEntity.status(HttpStatus.OK).body(lessonService.getLessons(principal.getUserId()));
     }
 
+    @GetMapping("/lessons/{id}")
+    public ResponseEntity<LessonResponse> getLessonById(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("id") Long id
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.getLessonById(id));
+    }
+
     @PostMapping("/lessons")
     public ResponseEntity<LessonResponse> createLesson(@AuthenticationPrincipal UserPrincipal principal, @RequestBody @Validated LessonsRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(lessonService.createLesson(principal.getUserId(), request.getName(), request.getDate(), request.getDuration(), request.getFollowedUserId()));
     }
     
+    @PutMapping("/lessons/{id}")
+    public ResponseEntity<LessonResponse> updateLesson(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("id") Long id,
+        @RequestBody @Validated LessonsRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.updateLesson(principal.getUserId(), id, request));
+    }
     
+    @DeleteMapping("/lessons/{id}")
+    public ResponseEntity<Void> deleteLesson(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("id") Long id
+    ) {
+        lessonService.deleteLesson(principal.getUserId(), id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    
+    @GetMapping("/teacher/{teacherId}/lessons")
+    public ResponseEntity<LessonsResponse> getTeacherLessons(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("teacherId") Long teacherId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.getTeacherLessons(teacherId));
+    }
+    
+    @PostMapping("/lessons/{lessonId}/take")
+    public ResponseEntity<LessonResponse> takeLesson(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("lessonId") Long lessonId,
+        @RequestParam("studentId") Long studentId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.takeLesson(lessonId, studentId));
+    }
+    
+    @PostMapping("/lessons/{lessonId}/switch")
+    public ResponseEntity<LessonResponse> switchLesson(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("lessonId") Long lessonId,
+        @RequestParam("studentId") Long studentId,
+        @RequestParam("otherStudentId") Long otherStudentId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.switchLesson(lessonId, studentId, otherStudentId));
+    }
+    
+    @PostMapping("/lessons/{lessonId}/approve-switch")
+    public ResponseEntity<LessonResponse> approveSwitchLesson(
+        @AuthenticationPrincipal UserPrincipal principal,
+        @PathVariable("lessonId") Long lessonId,
+        @RequestParam("studentId") Long studentId,
+        @RequestParam("approve") Boolean approve
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(lessonService.approveSwitchLesson(lessonId, studentId, approve));
+    }
 }
