@@ -5,7 +5,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
-
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -24,6 +24,7 @@ public class SourceEntity {
     private String title;
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String body;
 
     public SourceEntity(Long id, String title, String description, String body) {
