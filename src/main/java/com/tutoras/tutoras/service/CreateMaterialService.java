@@ -36,17 +36,34 @@ public class CreateMaterialService {
             sources = sourceRepository.getAllByIds(request.getSources_id());
             if (sources.isEmpty()) {
                 log.warn("No sources found with provided IDs: {}", request.getSources_id());
+                
+                // Пробуем получить случайный источник из БД вместо создания пустого
+                SourceEntity randomSource = sourceRepository.findRandom();
+                if (randomSource != null) {
+                    log.info("Используем случайный источник из БД: {}", randomSource.getId());
+                    sources.add(randomSource);
+                } else {
+                    log.info("Создаем пустой источник, так как случайный источник не найден");
+                    sources.add(new SourceEntity(1L, "Пустой документ", 
+                        "Автоматически сгенерированный документ", "Содержимое документа не указано"));
+                }
+            }
+        } else {
+            // Пробуем получить случайный источник из БД вместо создания пустого
+            SourceEntity randomSource = sourceRepository.findRandom();
+            if (randomSource != null) {
+                log.info("Используем случайный источник из БД: {}", randomSource.getId());
+                sources.add(randomSource);
+            } else {
+                log.info("Создаем пустой источник, так как источники не указаны и случайный источник не найден");
                 sources.add(new SourceEntity(1L, "Пустой документ", 
                     "Автоматически сгенерированный документ", "Содержимое документа не указано"));
             }
-        } else {
-            sources.add(new SourceEntity(1L, "Пустой документ", 
-                "Автоматически сгенерированный документ", "Содержимое документа не указано"));
         }
 
         SourceEntity combinedSource = pdfGeneratorService.generateCombinedSource(sources);
         
-        String materialUrl = pdfGeneratorService.generatePdf(combinedSource);
+        String materialUrl = pdfGeneratorService.generatePdfWithLatex(combinedSource);
         if (materialUrl == null) {
             log.error("Failed to generate PDF for material: {}", combinedSource.getTitle());
             materialUrl = "";

@@ -21,11 +21,16 @@ import com.tutoras.tutoras.repository.MaterialRepository;
 import com.tutoras.tutoras.repository.MaterialVisibleByUserRepository;
 import com.tutoras.tutoras.repository.TeacherRepository;
 import com.tutoras.tutoras.repository.UserRepository;
+import com.tutoras.tutoras.repository.SourceRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MaterialService {
+    
+    private static final Logger log = LoggerFactory.getLogger(MaterialService.class);
     
     @Autowired
     private MaterialRepository materialRepository;
@@ -41,6 +46,9 @@ public class MaterialService {
     
     @Autowired
     private PdfGeneratorService pdfGeneratorService;
+    
+    @Autowired
+    private SourceRepository sourceRepository;
     
     public MaterialsResponse getAllMaterials(int page, int perPage) {
         List<MaterialEntity> materials = materialRepository.findAll();
@@ -157,14 +165,28 @@ public class MaterialService {
         
         String fileUrl = request.getFileUrl();
         if (fileUrl == null || fileUrl.trim().isEmpty()) {
+            // Пытаемся получить случайный источник для содержимого, если он не указан
+            String bodyContent = "Автоматически сгенерированный материал";
+            
+            try {
+                // Попробуем получить случайный источник для более интересного содержимого
+                SourceEntity randomSource = sourceRepository.findRandom();
+                if (randomSource != null && randomSource.getBody() != null && !randomSource.getBody().isEmpty()) {
+                    bodyContent = randomSource.getBody();
+                    log.info("Использую содержимое случайного источника для материала: ID={}", randomSource.getId());
+                }
+            } catch (Exception e) {
+                log.warn("Не удалось получить случайный источник, использую стандартный текст", e);
+            }
+            
             SourceEntity source = new SourceEntity(
                 request.getTitle(),
                 request.getDescription(),
-                "Автоматически сгенерированный материал"
+                bodyContent
             );
             
             try {
-                fileUrl = pdfGeneratorService.generatePdf(source);
+                fileUrl = pdfGeneratorService.generatePdfWithLatex(source);
                 
                 if (fileUrl == null || fileUrl.trim().isEmpty()) {
                     fileUrl = "/files/pdf/default.pdf";

@@ -11,4 +11,7 @@ import java.util.List;
 public interface SourceRepository extends JpaRepository<SourceEntity, Long> {
     @Query("SELECT s FROM SourceEntity s WHERE s.id IN :ids")
     List<SourceEntity> getAllByIds(@Param("ids") List<Long> ids);
+
+    @Query(value = "SELECT * FROM Sources ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
+    SourceEntity findRandom();
 }

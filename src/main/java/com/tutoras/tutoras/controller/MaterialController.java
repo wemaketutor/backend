@@ -17,6 +17,7 @@ import com.tutoras.tutoras.model.*;
 import com.tutoras.tutoras.security.UserPrincipal;
 import com.tutoras.tutoras.service.MaterialService;
 import com.tutoras.tutoras.service.UserService;
+import com.tutoras.tutoras.service.PdfGeneratorService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ public class MaterialController extends BaseController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private PdfGeneratorService pdfGeneratorService;
     
     @Value("${spring.web.resources.static-locations[0]}")
     private String uploadDir;
@@ -172,7 +176,16 @@ public class MaterialController extends BaseController {
                 .body(resource);
     }
     
-
+    @GetMapping("/generate-random-pdf")
+    public ResponseEntity<String> generateRandomPdf() {
+        String pdfPath = pdfGeneratorService.generateRandomPdfWithLatex();
+        if (pdfPath != null) {
+            return ResponseEntity.ok(pdfPath);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+    
     private String determineContentType(String filePath) {
         if (filePath.endsWith(".pdf")) {
             return MediaType.APPLICATION_PDF_VALUE;
