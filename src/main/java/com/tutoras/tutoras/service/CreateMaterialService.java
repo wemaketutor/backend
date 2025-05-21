@@ -37,7 +37,6 @@ public class CreateMaterialService {
             if (sources.isEmpty()) {
                 log.warn("No sources found with provided IDs: {}", request.getSources_id());
                 
-                // Пробуем получить случайный источник из БД вместо создания пустого
                 SourceEntity randomSource = sourceRepository.findRandom();
                 if (randomSource != null) {
                     log.info("Используем случайный источник из БД: {}", randomSource.getId());
@@ -49,7 +48,7 @@ public class CreateMaterialService {
                 }
             }
         } else {
-            // Пробуем получить случайный источник из БД вместо создания пустого
+
             SourceEntity randomSource = sourceRepository.findRandom();
             if (randomSource != null) {
                 log.info("Используем случайный источник из БД: {}", randomSource.getId());

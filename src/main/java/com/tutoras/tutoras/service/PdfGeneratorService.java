@@ -86,7 +86,6 @@ public class PdfGeneratorService {
             }
             PDType0Font font = PDType0Font.load(document, fontStream);
         
-            // Заголовок и описание можно вывести в одном contentStream
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
                 contentStream.beginText();
                 contentStream.setFont(font, 16);
@@ -103,7 +102,6 @@ public class PdfGeneratorService {
                 }
             }
         
-            // Тело документа с переносом строк и страниц
             String[] lines = source.getBody() != null ? source.getBody().split("\n") : new String[0];
             int yPosition = 700;
         
@@ -123,7 +121,6 @@ public class PdfGeneratorService {
                         contentStream.endText();
                         contentStream.close();
         
-                        // Новая страница
                         page = new PDPage();
                         document.addPage(page);
         
@@ -160,77 +157,104 @@ public class PdfGeneratorService {
     private String generateLatexContent(SourceEntity source) {
         String bodyContent = source.getBody() == null ? "" : source.getBody();
         
-        // Разбиваем body на параграфы и обрабатываем их с учетом форматирования
-        String[] paragraphs = bodyContent.split("\n\n");
-        StringBuilder formattedBody = new StringBuilder();
+        boolean hasLatexMarkup = bodyContent.contains("\\begin{") || 
+                                 bodyContent.contains("\\end{") || 
+                                 bodyContent.contains("$") ||
+                                 bodyContent.contains("\\item");
         
-        for (String paragraph : paragraphs) {
-            if (paragraph.trim().isEmpty()) {
-                continue;
+        if (hasLatexMarkup) {
+            log.info("Обнаружена LaTeX-разметка в источнике, сохраняем без экранирования");
+            
+            String template = """
+            \\documentclass[12pt]{article}
+            \\usepackage[T2A]{fontenc}
+            \\usepackage[utf8]{inputenc}
+            \\usepackage[english,russian]{babel}
+            \\usepackage{geometry}
+            \\usepackage{hyperref}
+            \\usepackage{amsmath}
+            \\usepackage{amssymb}
+            \\usepackage{enumitem}
+            \\geometry{a4paper, margin=2cm}
+            \\begin{document}
+            \\begin{center}
+            \\textbf{\\Large %s}\\\\[1em]
+            %s
+            \\end{center}
+            
+            %s
+            \\end{document}
+            """;
+            
+            return String.format(template,
+                escapeLatex(source.getTitle()),
+                escapeLatex(source.getDescription()),
+                bodyContent
+            );
+        } else {
+            String[] paragraphs = bodyContent.split("\n\n");
+            StringBuilder formattedBody = new StringBuilder();
+            
+            for (String paragraph : paragraphs) {
+                if (paragraph.trim().isEmpty()) {
+                    continue;
+                }
+                
+                if (paragraph.trim().startsWith("# ")) {
+                    String heading = paragraph.trim().substring(2);
+                    formattedBody.append("\\section{").append(escapeLatex(heading)).append("}\n\n");
+                } else if (paragraph.trim().startsWith("## ")) {
+                    String heading = paragraph.trim().substring(3);
+                    formattedBody.append("\\subsection{").append(escapeLatex(heading)).append("}\n\n");
+                }
+                else if (paragraph.trim().startsWith("- ") || paragraph.trim().startsWith("* ")) {
+                    formattedBody.append("\\begin{itemize}\n");
+                    String[] lines = paragraph.split("\n");
+                    for (String line : lines) {
+                        if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
+                            String item = line.trim().substring(2);
+                            formattedBody.append("\\item ").append(escapeLatex(item)).append("\n");
+                        }
+                    }
+                    formattedBody.append("\\end{itemize}\n\n");
+                }
+                else if (paragraph.trim().matches("^-{3,}$")) {
+                    formattedBody.append("\\hrulefill\n\n");
+                }
+                else {
+                    formattedBody.append(escapeLatex(paragraph.trim())).append("\n\n");
+                }
             }
             
-            // Обработка заголовков (начинаются с # или ##)
-            if (paragraph.trim().startsWith("# ")) {
-                String heading = paragraph.trim().substring(2);
-                formattedBody.append("\\section{").append(escapeLatex(heading)).append("}\n\n");
-            } else if (paragraph.trim().startsWith("## ")) {
-                String heading = paragraph.trim().substring(3);
-                formattedBody.append("\\subsection{").append(escapeLatex(heading)).append("}\n\n");
-            }
-            // Обработка маркированных списков (начинаются с - или *)
-            else if (paragraph.trim().startsWith("- ") || paragraph.trim().startsWith("* ")) {
-                formattedBody.append("\\begin{itemize}\n");
-                String[] lines = paragraph.split("\n");
-                for (String line : lines) {
-                    if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
-                        String item = line.trim().substring(2);
-                        formattedBody.append("\\item ").append(escapeLatex(item)).append("\n");
-                    }
-                }
-                formattedBody.append("\\end{itemize}\n\n");
-            }
-            // Обработка разделителей (-----)
-            else if (paragraph.trim().matches("^-{3,}$")) {
-                formattedBody.append("\\hrulefill\n\n");
-            }
-            // Обычный текст
-            else {
-                formattedBody.append(escapeLatex(paragraph.trim())).append("\n\n");
-            }
+            String template = """
+            \\documentclass[12pt]{article}
+            \\usepackage[T2A]{fontenc}
+            \\usepackage[utf8]{inputenc}
+            \\usepackage[russian]{babel}
+            \\usepackage{geometry}
+            \\usepackage{hyperref}
+            \\geometry{a4paper, margin=2cm}
+            \\begin{document}
+            \\begin{center}
+            \\textbf{\\Large %s}\\\\[1em]
+            %s
+            \\end{center}
+            
+            %s
+            \\end{document}
+            """;
+            
+            String result = String.format(template,
+                escapeLatex(source.getTitle()),
+                escapeLatex(source.getDescription()),
+                formattedBody.toString()
+            );
+            
+            log.info("Сгенерирован стандартный LaTeX шаблон: {}", result.substring(0, Math.min(200, result.length())) + "...");
+            return result;
         }
-        
-        String template = """
-        \\documentclass[12pt]{article}
-        \\usepackage[T2A]{fontenc}
-        \\usepackage[utf8]{inputenc}
-        \\usepackage[russian]{babel}
-        \\usepackage{geometry}
-        \\usepackage{hyperref}
-        \\geometry{a4paper, margin=2cm}
-        \\begin{document}
-        \\begin{center}
-        \\textbf{\\Large %s}\\\\[1em]
-        %s
-        \\end{center}
-        
-        %s
-        \\end{document}
-        """;
-        
-        String result = String.format(template,
-            escapeLatex(source.getTitle()),
-            escapeLatex(source.getDescription()),
-            formattedBody.toString()
-        );
-        
-        log.info("Сгенерирован LaTeX шаблон: {}", result.substring(0, Math.min(200, result.length())) + "...");
-        return result;
     }
     
-    /**
-     * Транслитерация русского текста в латиницу 
-     * Метод оставлен для возможного использования в будущем, но сейчас не используется
-     */
     private String transliterateRussian(String text) {
         if (text == null) return "";
         
@@ -282,7 +306,6 @@ public class PdfGeneratorService {
 
             Files.writeString(texFile, generateLatexContent(source));
 
-            // Компилируем через pdflatex с использованием shell-скрипта для дополнительной надежности
             String command = "cd " + pdfDirPath.toString() + " && /usr/bin/pdflatex -interaction=nonstopmode \"" + texFile.getFileName() + "\"";
             log.info("Выполняем команду: {}", command);
             
@@ -290,7 +313,6 @@ public class PdfGeneratorService {
             pb.redirectErrorStream(true);
             Process process = pb.start();
             
-            // Читаем вывод процесса для отладки
             try (java.io.BufferedReader reader = new java.io.BufferedReader(
                     new java.io.InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -304,16 +326,13 @@ public class PdfGeneratorService {
             int exitCode = process.waitFor();
             log.info("pdflatex exit code: {}", exitCode);
 
-            // Проверяем, создался ли PDF с точным указанием пути
             Path exactPdfFile = pdfDirPath.resolve(texFile.getFileName().toString().replace(".tex", ".pdf"));
             log.info("Проверяем PDF по пути: {}", exactPdfFile);
             
             if (Files.exists(exactPdfFile)) {
                 log.info("PDF успешно создан!");
-                // Можно удалить вспомогательные файлы .aux, .log, .tex
                 Files.deleteIfExists(pdfDirPath.resolve(texFile.getFileName().toString().replace(".pdf", ".aux")));
                 
-                // Вернем относительный путь к PDF
                 return PDF_DIRECTORY + exactPdfFile.getFileName().toString();
             } else {
                 Path logFile = pdfDirPath.resolve(texFile.getFileName().toString().replace(".tex", ".log"));
@@ -327,7 +346,6 @@ public class PdfGeneratorService {
                     }
                 }
                 
-                // Для отладки сохраняем .tex и .log файлы
                 log.error("PDF не был создан. Tex-файл сохранен: {}, Log-файл сохранен: {}",
                           texFile, logFile);
                 return null;

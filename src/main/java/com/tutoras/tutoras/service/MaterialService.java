@@ -165,11 +165,10 @@ public class MaterialService {
         
         String fileUrl = request.getFileUrl();
         if (fileUrl == null || fileUrl.trim().isEmpty()) {
-            // Пытаемся получить случайный источник для содержимого, если он не указан
             String bodyContent = "Автоматически сгенерированный материал";
             
             try {
-                // Попробуем получить случайный источник для более интересного содержимого
+
                 SourceEntity randomSource = sourceRepository.findRandom();
                 if (randomSource != null && randomSource.getBody() != null && !randomSource.getBody().isEmpty()) {
                     bodyContent = randomSource.getBody();
